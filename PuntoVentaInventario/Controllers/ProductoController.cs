@@ -20,58 +20,8 @@ namespace PuntoVentaInventario.Controllers
             _config = config;
             _context = context;  // ← Inyecta
         }
-        //[HttpGet("db")]
-        //public IActionResult TestDb()
-        //{
-        //    try
-        //    {
-        //        var connString = _config.GetConnectionString("DefaultConnection");
-        //        using var connection = new SqlConnection(connString);
-        //        connection.Open();
-        //        return Ok($"¡Conexión exitosa! Servidor: {connection.ServerVersion}");
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return BadRequest(e.Message);
-        //    }
-        //}
 
-        //[HttpGet("productos")]  // Lista todos
-        //public IActionResult GetProductos()
-        //{
-        //    try
-        //    {
-        //        var connString = _config.GetConnectionString("DefaultConnection");
-        //        using var conn = new SqlConnection(connString);
-        //        using var cmd = new SqlCommand("SP_ProductosListar", conn)
-        //        {
-        //            CommandType = CommandType.StoredProcedure
-        //        };
-        //        conn.Open();
-        //        using var reader = cmd.ExecuteReader();
-        //        var productos = new List<object>();
-        //        while (reader.Read())
-        //        {
-        //            var producto = new
-        //            {
-        //                Id = reader["Id"],
-        //                Codigo = reader["Codigo"],
-        //                Nombre = reader["Nombre"],
-        //                Descripcion = reader["Descripcion"],
-        //                Precio = reader["Precio"],
-        //                Stock = reader["Stock"],
-        //                Categoria = reader["Categoria"]
-        //            };
-        //            productos.Add(producto);
-        //        }
-        //        return Ok(productos);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return BadRequest(e.Message);
-        //    }
-        //}
-
+        // Obtiene todos los productos activos
         [HttpGet("productos")]
         public async Task<IActionResult> GetProductos()
         {
@@ -94,6 +44,7 @@ namespace PuntoVentaInventario.Controllers
             return Ok(productos);
         }
 
+        // Obtiene Prodcuto por Codigo
         [HttpGet("codigo/{codigo}")]
         public async Task<IActionResult> GetProductoPorCodigo(string codigo)
         {
@@ -120,6 +71,7 @@ namespace PuntoVentaInventario.Controllers
             return Ok(producto);
         }
 
+        // Inserta nuevo producto
         [HttpPost("producto")]
         public async Task<IActionResult> InsertarProducto([FromBody] ProductoDto productoDto)
         {
@@ -160,7 +112,7 @@ namespace PuntoVentaInventario.Controllers
             return CreatedAtAction(nameof(GetProductoPorCodigo), new { codigo = producto.Codigo }, dto);
         }
 
-
+        // Actualiza producto existente por código
         [HttpPut("producto/{codigo}")]
         public async Task<IActionResult> ActualizarProducto(string codigo, [FromBody] ProductoDto productoDto)
         {
@@ -189,69 +141,25 @@ namespace PuntoVentaInventario.Controllers
             return NoContent();  // 204 Success
         }
 
+        // Soft delete - marca como inactivo
+        [HttpDelete("producto/{codigo}")]
+        public async Task<IActionResult> EliminarProducto(string codigo)
+        {
+            var producto = await _context.Productos
+                .FirstOrDefaultAsync(p => p.Codigo == codigo && p.Activo);
 
-        //[HttpGet("producto/{id}")]  // Uno por Id
-        //public IActionResult GetProducto(int id)
-        //{
-        //    try
-        //    {
-        //        var connString = _config.GetConnectionString("DefaultConnection");
-        //        using var conn = new SqlConnection(connString);
-        //        using var cmd = new SqlCommand("SP_ProductosObtener", conn)
-        //        {
-        //            CommandType = CommandType.StoredProcedure
-        //        };
-        //        cmd.Parameters.AddWithValue("@Id", id);
-        //        conn.Open();
-        //        using var reader = cmd.ExecuteReader();
-        //        if (reader.Read())
-        //        {
-        //            var producto = new
-        //            {
-        //                Id = reader["Id"],
-        //                Codigo = reader["Codigo"],
-        //                Nombre = reader["Nombre"],
-        //                Descripcion = reader["Descripcion"] ?? "",
-        //                Precio = reader["Precio"],
-        //                Stock = reader["Stock"],
-        //                Categoria = reader["Categoria"] ?? ""
-        //            };
-        //            return Ok(producto);
-        //        }
-        //        return NotFound("Producto no encontrado");
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return BadRequest(e.Message);
-        //    }
-        //}
+            if (producto == null)
+                return NotFound("Producto no encontrado");
 
-        //[HttpPost("producto")]  // Insertar
-        //public IActionResult InsertarProducto([FromBody] ProductoDto producto)
-        //{
-        //    try
-        //    {
-        //        var connString = _config.GetConnectionString("DefaultConnection");
-        //        using var conn = new SqlConnection(connString);
-        //        using var cmd = new SqlCommand("SP_ProductosInsertar", conn)
-        //        {
-        //            CommandType = CommandType.StoredProcedure
-        //        };
-        //        cmd.Parameters.AddWithValue("@Codigo", producto.Codigo);
-        //        cmd.Parameters.AddWithValue("@Nombre", producto.Nombre);
-        //        cmd.Parameters.AddWithValue("@Descripcion", (object)producto.Descripcion ?? DBNull.Value);
-        //        cmd.Parameters.AddWithValue("@Precio", producto.Precio);
-        //        cmd.Parameters.AddWithValue("@Stock", producto.Stock);
-        //        cmd.Parameters.AddWithValue("@Categoria", (object)producto.Categoria ?? DBNull.Value);
+            // Soft delete: solo marca como inactivo
+            producto.Activo = false;
+            producto.FechaEliminacion = DateTime.UtcNow;
+            producto.IdUsuarioEliminacion = 1;  // Usuario logueado
 
-        //        conn.Open();
-        //        var nuevoId = cmd.ExecuteScalar();
-        //        return Ok(new { Id = nuevoId, Mensaje = "Producto insertado" });
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return BadRequest(e.Message);
-        //    }
-        //}
+            await _context.SaveChangesAsync();
+            return NoContent();  // 204 Success
+        }
+
+
     }
 }
