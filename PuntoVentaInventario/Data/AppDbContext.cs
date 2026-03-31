@@ -39,6 +39,11 @@ namespace PuntoVentaInventario.Data
         public DbSet<Producto> Productos { get; set; }
 
         /// <summary>
+        /// Trae el listado de los Productos Activos y los mapea posteriormente
+        /// </summary>
+        public DbSet<ProductoDto> ProductosDto { get; set; }
+
+        /// <summary>
         /// Representa la tabla Ventas en la base de datos.
         /// 
         /// Contiene la cabecera o información general de cada venta,
@@ -135,6 +140,9 @@ namespace PuntoVentaInventario.Data
                 .WithMany()
                 .HasForeignKey(d => d.IdProducto)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Configuración del DTO como tipo sin llave
+            modelBuilder.Entity<ProductoDto>().HasNoKey();
         }
     }
 }

@@ -25,23 +25,36 @@ namespace PuntoVentaInventario.Controllers
         [HttpGet("productos")]
         public async Task<IActionResult> GetProductos()
         {
-            var productos = await _context.Productos
-                .Where(p => p.Activo)
-                .Select(p => new ProductoDto  // ← Mapeo directo EF → DTO
-                {
-                    Id = p.Id,
-                    Codigo = p.Codigo,
-                    Nombre = p.Nombre,
-                    Descripcion = p.Descripcion,
-                    PrecioCompra = p.PrecioCompra,
-                    PrecioVenta = p.PrecioVenta,
-                    Stock = p.Stock,
-                    StockMinimo = p.StockMinimo,
-                    Categoria = p.Categoria,
-                    Proveedor = p.Proveedor
-                })
-                .ToListAsync();
-            return Ok(productos);
+            try
+            {
+                var productos = await _context.ProductosDto
+                    .FromSqlRaw("EXEC SP_ProductosListar")
+                    .ToListAsync();
+
+                return Ok(productos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al registrar la venta: {ex.Message}");
+
+            }
+            //var productos = await _context.Productos
+            //    .Where(p => p.Activo)
+            //    .Select(p => new ProductoDto  // ← Mapeo directo EF → DTO
+            //    {
+            //        Id = p.Id,
+            //        Codigo = p.Codigo,
+            //        Nombre = p.Nombre,
+            //        Descripcion = p.Descripcion,
+            //        PrecioCompra = p.PrecioCompra,
+            //        PrecioVenta = p.PrecioVenta,
+            //        Stock = p.Stock,
+            //        StockMinimo = p.StockMinimo,
+            //        Categoria = p.Categoria,
+            //        Proveedor = p.Proveedor
+            //    })
+            //    .ToListAsync();
+            //return Ok(productos);
         }
 
         // Obtiene Prodcuto por Codigo
