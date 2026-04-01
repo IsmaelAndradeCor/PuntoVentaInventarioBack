@@ -22,7 +22,7 @@ namespace PuntoVentaInventario.Controllers
         }
 
         // Obtiene todos los productos activos
-        [HttpGet("productos")]
+        [HttpGet("listar_productos")]
         public async Task<IActionResult> GetProductos()
         {
             try
@@ -36,7 +36,6 @@ namespace PuntoVentaInventario.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"Error al registrar la venta: {ex.Message}");
-
             }
             //var productos = await _context.Productos
             //    .Where(p => p.Activo)
@@ -57,35 +56,52 @@ namespace PuntoVentaInventario.Controllers
             //return Ok(productos);
         }
 
-        // Obtiene Prodcuto por Codigo
-        [HttpGet("codigo/{codigo}")]
+        /// <summary>
+        /// Funcion para obtener un producto por su código utilizando el procedimiento almacenado SP_ProductosObtener
+        /// </summary>
+        /// <param name="codigo"></param>
+        /// <returns>productoDto</returns>
+        [HttpGet("producto_codigo/{codigo}")]
         public async Task<IActionResult> GetProductoPorCodigo(string codigo)
         {
-            var producto = await _context.Productos
-                .Where(p => p.Codigo == codigo && p.Activo)
-                .Select(p => new ProductoDto  // ← Mapeo directo
-                {
-                    Id = p.Id,
-                    Codigo = p.Codigo,
-                    Nombre = p.Nombre,
-                    Descripcion = p.Descripcion,
-                    PrecioCompra = p.PrecioCompra,
-                    PrecioVenta = p.PrecioVenta,
-                    Stock = p.Stock,
-                    StockMinimo = p.StockMinimo,
-                    Categoria = p.Categoria,
-                    Proveedor = p.Proveedor
-                })
-                .FirstOrDefaultAsync();
+            try
+            {
+                var producto = (await _context.ProductosDto
+                    .FromSqlInterpolated($"EXEC sp_ProductosObtener @Codigo={codigo}")
+                    .AsNoTracking()
+                    .ToListAsync())
+                    .FirstOrDefault();
 
-            if (producto == null)
-                return NotFound("Producto no encontrado");
+                if (producto == null)
+                    return NotFound("Producto no encontrado");
 
-            return Ok(producto);
+                return Ok(producto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al obtener producto: {ex.Message}");
+            }
+        }
+
+        [HttpGet("stock_minimo")]
+        public async Task<IActionResult> GetProductosStockMinimo()
+        {
+            try
+            {
+                var productos = await _context.ProductosDto
+                    .FromSqlRaw("sp_ProductosObtenerStockMinimo")
+                    .ToListAsync();
+
+                return Ok(productos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al registrar la venta: {ex.Message}");
+            }
         }
 
         // Inserta nuevo producto
-        [HttpPost("producto")]
+        [HttpPost("crear_producto")]
         public async Task<IActionResult> InsertarProducto([FromBody] ProductoDto productoDto)
         {
             if (!ModelState.IsValid)
@@ -126,7 +142,7 @@ namespace PuntoVentaInventario.Controllers
         }
 
         // Actualiza producto existente por código
-        [HttpPut("producto/{codigo}")]
+        [HttpPut("actualizar_producto/{codigo}")]
         public async Task<IActionResult> ActualizarProducto(string codigo, [FromBody] ProductoDto productoDto)
         {
             if (!ModelState.IsValid)
@@ -155,7 +171,7 @@ namespace PuntoVentaInventario.Controllers
         }
 
         // Soft delete - marca como inactivo
-        [HttpDelete("producto/{codigo}")]
+        [HttpDelete("eliminar_producto/{codigo}")]
         public async Task<IActionResult> EliminarProducto(string codigo)
         {
             var producto = await _context.Productos

@@ -27,15 +27,15 @@ namespace PuntoVentaInventario.Models
         [Required, MaxLength(20)]
         public string FormaPago { get; set; } = "Efectivo";
 
-        public bool Activo { get; set; } = true;
+        //public bool Activo { get; set; } = true;
 
-        public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
-        public DateTime? FechaModificacion { get; set; }
-        public DateTime? FechaEliminacion { get; set; }
+        //public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
+        //public DateTime? FechaModificacion { get; set; }
+        //public DateTime? FechaEliminacion { get; set; }
 
-        public int IdUsuarioCreacion { get; set; }
-        public int? IdUsuarioModificacion { get; set; }
-        public int? IdUsuarioEliminacion { get; set; }
+        //public int IdUsuarioCreacion { get; set; }
+        //public int? IdUsuarioModificacion { get; set; }
+        //public int? IdUsuarioEliminacion { get; set; }
 
         public virtual ICollection<DetalleVenta> Detalles { get; set; } = new List<DetalleVenta>();
     }
