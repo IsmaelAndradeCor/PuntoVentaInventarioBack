@@ -109,7 +109,7 @@ namespace PuntoVentaInventario.Controllers
 
             // Verificar código único
             if (await _context.Productos.AnyAsync(p => p.Codigo == productoDto.Codigo))
-                return BadRequest("Código ya existe");
+                return BadRequest(new { mensaje = "Código ya existe" });
 
             var producto = new Producto
             {
@@ -136,7 +136,13 @@ namespace PuntoVentaInventario.Controllers
                 Id = producto.Id,
                 Codigo = producto.Codigo,
                 Nombre = producto.Nombre,
-                // ... resto propiedades
+                Descripcion = producto.Descripcion,
+                PrecioCompra = producto.PrecioCompra,
+                PrecioVenta = producto.PrecioVenta,
+                Stock = producto.Stock,
+                StockMinimo = producto.StockMinimo,
+                Categoria = producto.Categoria,
+                Proveedor = producto.Proveedor
             };
             return CreatedAtAction(nameof(GetProductoPorCodigo), new { codigo = producto.Codigo }, dto);
         }
@@ -152,7 +158,7 @@ namespace PuntoVentaInventario.Controllers
                 .FirstOrDefaultAsync(p => p.Codigo == codigo && p.Activo);
 
             if (producto == null)
-                return NotFound("Producto no encontrado");
+                return NotFound( new { mensaje = "Producto no encontrado" });
 
             // Actualiza propiedades
             producto.Nombre = productoDto.Nombre;
