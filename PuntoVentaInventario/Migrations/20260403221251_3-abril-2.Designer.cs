@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PuntoVentaInventario.Data;
 
@@ -11,9 +12,11 @@ using PuntoVentaInventario.Data;
 namespace PuntoVentaInventario.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260403221251_3-abril-2")]
+    partial class _3abril2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,50 +29,40 @@ namespace PuntoVentaInventario.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnOrder(0);
+                        .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Cantidad")
-                        .HasColumnType("int")
-                        .HasColumnOrder(5);
+                        .HasColumnType("int");
 
                     b.Property<string>("CodigoProducto")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnOrder(3);
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<decimal>("CostoTotal")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnOrder(7);
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("CostoUnitario")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnOrder(6);
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("IdProducto")
-                        .HasColumnType("int")
-                        .HasColumnOrder(2);
+                        .HasColumnType("int");
 
                     b.Property<int>("IdVenta")
-                        .HasColumnType("int")
-                        .HasColumnOrder(1);
+                        .HasColumnType("int");
 
                     b.Property<string>("NombreProducto")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(4);
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("PrecioTotal")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnOrder(9);
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("PrecioUnitario")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnOrder(8);
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 

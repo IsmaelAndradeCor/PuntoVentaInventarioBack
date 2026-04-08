@@ -23,10 +23,16 @@ namespace PuntoVentaInventario.Models
         public int Cantidad { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
+        public decimal CostoUnitario { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal CostoTotal { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
         public decimal PrecioUnitario { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal Subtotal { get; set; }
+        public decimal PrecioTotal { get; set; }
 
         public virtual Venta Venta { get; set; } = null!;
         public virtual Producto Producto { get; set; } = null!;

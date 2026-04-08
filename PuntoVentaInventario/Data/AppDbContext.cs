@@ -59,6 +59,8 @@ namespace PuntoVentaInventario.Data
         /// </summary>
         public DbSet<DetalleVenta> DetalleVentas { get; set; }
 
+        public DbSet<GenerarVentasDto> GenerarVentasDto { get; set; }
+
         /// <summary>
         /// Método donde se configura el modelo de datos con Fluent API.
         /// 
@@ -141,8 +143,25 @@ namespace PuntoVentaInventario.Data
                 .HasForeignKey(d => d.IdProducto)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            /// Configuración de orden de columnas para DetalleVenta.
+            modelBuilder.Entity<DetalleVenta>(entity =>
+            {
+                entity.Property(e => e.Id).HasColumnOrder(0);
+                entity.Property(e => e.IdVenta).HasColumnOrder(1);
+                entity.Property(e => e.IdProducto).HasColumnOrder(2);
+                entity.Property(e => e.CodigoProducto).HasColumnOrder(3);
+                entity.Property(e => e.NombreProducto).HasColumnOrder(4);
+                entity.Property(e => e.Cantidad).HasColumnOrder(5);
+                entity.Property(e => e.CostoUnitario).HasColumnOrder(6);
+                entity.Property(e => e.CostoTotal).HasColumnOrder(7);
+                entity.Property(e => e.PrecioUnitario).HasColumnOrder(8);
+                entity.Property(e => e.PrecioTotal).HasColumnOrder(9);
+            });
+
             // Configuración del DTO como tipo sin llave
             modelBuilder.Entity<ProductoDto>().HasNoKey();
+            modelBuilder.Entity<GenerarVentasDto>().HasNoKey();
+
         }
     }
 }
