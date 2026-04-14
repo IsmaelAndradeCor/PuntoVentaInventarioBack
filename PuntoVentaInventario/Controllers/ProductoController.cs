@@ -3,7 +3,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using PuntoVentaInventario.Data;
-using PuntoVentaInventario.Models;
+using PuntoVentaInventario.Models.Entities;
 using System.Data;
 
 namespace PuntoVentaInventario.Controllers
@@ -35,7 +35,7 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al registrar la venta: {ex.Message}");
+                return StatusCode(500, $"Error al obtener los productos: {ex.Message}");
             }
             //var productos = await _context.Productos
             //    .Where(p => p.Activo)
@@ -61,26 +61,63 @@ namespace PuntoVentaInventario.Controllers
         /// </summary>
         /// <param name="codigo"></param>
         /// <returns>productoDto</returns>
+        //[HttpGet("producto_codigo/{codigo}")]
+        //public async Task<IActionResult> GetProductoPorCodigo(string codigo)
+        //{
+        //    try
+        //    {
+        //        var producto = (await _context.ProductosDto
+        //            .FromSqlInterpolated($"EXEC sp_ProductosObtener @Codigo={codigo}")
+        //            .AsNoTracking()
+        //            .ToListAsync())
+        //            .FirstOrDefault();
+
+        //        if (producto == null)
+        //            return NotFound("Producto no encontrado");
+
+        //        return Ok(producto);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Error al obtener producto: {ex.Message}");
+        //    }
+        //}
         [HttpGet("producto_codigo/{codigo}")]
         public async Task<IActionResult> GetProductoPorCodigo(string codigo)
         {
-            try
-            {
-                var producto = (await _context.ProductosDto
-                    .FromSqlInterpolated($"EXEC sp_ProductosObtener @Codigo={codigo}")
-                    .AsNoTracking()
-                    .ToListAsync())
-                    .FirstOrDefault();
+            var producto = await _context.Productos
+                .AsNoTracking()
+                .Include(p => p.Categoria)
+                .Include(p => p.Marca)
+                .Include(p => p.UnidadMedida)
+                .Include(p => p.ProductoProveedores)
+                    .ThenInclude(pp => pp.Proveedor)
+                .Where(p => p.Codigo == codigo && p.Activo)
+                .Select(p => new ProductoResponseDto
+                {
+                    Id = p.Id,
+                    Codigo = p.Codigo,
+                    Nombre = p.Nombre,
+                    Descripcion = p.Descripcion,
+                    Costo = p.Costo,
+                    Precio = p.Precio,
+                    Stock = p.Stock,
+                    StockMinimo = p.StockMinimo,
+                    IdCategoria = p.IdCategoria,
+                    Categoria = p.Categoria != null ? p.Categoria.Nombre : null,
+                    IdMarca = p.IdMarca,
+                    Marca = p.Marca != null ? p.Marca.Nombre : null,
+                    IdUnidadMedida = p.IdUnidadMedida,
+                    UnidadMedida = p.UnidadMedida != null ? p.UnidadMedida.Nombre : null,
+                    IdsProveedores = p.ProductoProveedores.Select(pp => pp.IdProveedor).ToList(),
+                    Proveedores = p.ProductoProveedores.Select(pp => pp.Proveedor.Nombre).ToList()
+                })
+                .FirstOrDefaultAsync();
 
-                if (producto == null)
-                    return NotFound("Producto no encontrado");
+            if (producto == null)
+                return NotFound("Producto no encontrado");
 
-                return Ok(producto);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Error al obtener producto: {ex.Message}");
-            }
+            return Ok(producto);
         }
 
         [HttpGet("stock_minimo")]
@@ -100,80 +137,179 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
-        // Inserta nuevo producto
+        //// Inserta nuevo producto
+        //[HttpPost("crear_producto")]
+        //public async Task<IActionResult> InsertarProducto([FromBody] ProductoDto productoDto)
+        //{
+        //    if (!ModelState.IsValid)
+        //        return BadRequest(ModelState);
+
+        //    // Verificar código único
+        //    if (await _context.Productos.AnyAsync(p => p.Codigo == productoDto.Codigo))
+        //        return BadRequest(new { mensaje = "Código ya existe" });
+
+        //    var producto = new Producto
+        //    {
+        //        Codigo = productoDto.Codigo,
+        //        Nombre = productoDto.Nombre,
+        //        Descripcion = productoDto.Descripcion,
+        //        PrecioCompra = productoDto.PrecioCompra,
+        //        PrecioVenta = productoDto.PrecioVenta,
+        //        Stock = productoDto.Stock,
+        //        StockMinimo = productoDto.StockMinimo,
+        //        Categoria = productoDto.Categoria,
+        //        Proveedor = productoDto.Proveedor,
+        //        FechaCreacion = DateTime.UtcNow,
+        //        IdUsuarioCreacion = 1,
+        //        Activo = true
+        //    };
+
+        //    _context.Productos.Add(producto);
+        //    await _context.SaveChangesAsync();
+
+        //    // ← CAMBIO: Retorna DTO (no Entity)
+        //    var dto = new ProductoDto
+        //    {
+        //        Id = producto.Id,
+        //        Codigo = producto.Codigo,
+        //        Nombre = producto.Nombre,
+        //        Descripcion = producto.Descripcion,
+        //        PrecioCompra = producto.PrecioCompra,
+        //        PrecioVenta = producto.PrecioVenta,
+        //        Stock = producto.Stock,
+        //        StockMinimo = producto.StockMinimo,
+        //        Categoria = producto.Categoria,
+        //        Proveedor = producto.Proveedor
+        //    };
+        //    return CreatedAtAction(nameof(GetProductoPorCodigo), new { codigo = producto.Codigo }, dto);
+        //}
         [HttpPost("crear_producto")]
-        public async Task<IActionResult> InsertarProducto([FromBody] ProductoDto productoDto)
+        public async Task<IActionResult> InsertarProducto([FromBody] ProductoUpsertDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Verificar código único
-            if (await _context.Productos.AnyAsync(p => p.Codigo == productoDto.Codigo))
+            if (await _context.Productos.AnyAsync(p => p.Codigo == dto.Codigo))
                 return BadRequest(new { mensaje = "Código ya existe" });
 
             var producto = new Producto
             {
-                Codigo = productoDto.Codigo,
-                Nombre = productoDto.Nombre,
-                Descripcion = productoDto.Descripcion,
-                PrecioCompra = productoDto.PrecioCompra,
-                PrecioVenta = productoDto.PrecioVenta,
-                Stock = productoDto.Stock,
-                StockMinimo = productoDto.StockMinimo,
-                Categoria = productoDto.Categoria,
-                Proveedor = productoDto.Proveedor,
+                Codigo = dto.Codigo,
+                Nombre = dto.Nombre,
+                Descripcion = dto.Descripcion,
+                Costo = dto.Costo,
+                Precio = dto.Precio,
+                Stock = dto.Stock,
+                StockMinimo = dto.StockMinimo,
+                IdCategoria = dto.IdCategoria,
+                IdMarca = dto.IdMarca,
+                IdUnidadMedida = dto.IdUnidadMedida,
                 FechaCreacion = DateTime.UtcNow,
                 IdUsuarioCreacion = 1,
                 Activo = true
             };
 
+            if (dto.IdsProveedores?.Any() == true)
+            {
+                producto.ProductoProveedores = dto.IdsProveedores
+                    .Distinct()
+                    .Select(idProveedor => new ProductoProveedor
+                    {
+                        IdProveedor = idProveedor,
+                        Producto = producto
+                    })
+                    .ToList();
+            }
+
             _context.Productos.Add(producto);
             await _context.SaveChangesAsync();
 
-            // ← CAMBIO: Retorna DTO (no Entity)
-            var dto = new ProductoDto
+            return CreatedAtAction(nameof(GetProductoPorCodigo), new { codigo = producto.Codigo }, new
             {
-                Id = producto.Id,
-                Codigo = producto.Codigo,
-                Nombre = producto.Nombre,
-                Descripcion = producto.Descripcion,
-                PrecioCompra = producto.PrecioCompra,
-                PrecioVenta = producto.PrecioVenta,
-                Stock = producto.Stock,
-                StockMinimo = producto.StockMinimo,
-                Categoria = producto.Categoria,
-                Proveedor = producto.Proveedor
-            };
-            return CreatedAtAction(nameof(GetProductoPorCodigo), new { codigo = producto.Codigo }, dto);
+                producto.Id,
+                producto.Codigo
+            });
         }
 
-        // Actualiza producto existente por código
+        //// Actualiza producto existente por código
+        //[HttpPut("actualizar_producto/{codigo}")]
+        //public async Task<IActionResult> ActualizarProducto(string codigo, [FromBody] ProductoDto productoDto)
+        //{
+        //    if (!ModelState.IsValid)
+        //        return BadRequest(ModelState);
+
+        //    var producto = await _context.Productos
+        //        .FirstOrDefaultAsync(p => p.Codigo == codigo && p.Activo);
+
+        //    if (producto == null)
+        //        return NotFound( new { mensaje = "Producto no encontrado" });
+
+        //    // Actualiza propiedades
+        //    producto.Nombre = productoDto.Nombre;
+        //    producto.Descripcion = productoDto.Descripcion;
+        //    producto.PrecioCompra = productoDto.PrecioCompra;
+        //    producto.PrecioVenta = productoDto.PrecioVenta;
+        //    producto.Stock = productoDto.Stock;
+        //    producto.StockMinimo = productoDto.StockMinimo;
+        //    producto.Categoria = productoDto.Categoria;
+        //    producto.Proveedor = productoDto.Proveedor;
+        //    producto.FechaModificacion = DateTime.UtcNow;
+        //    producto.IdUsuarioModificacion = 1;  // Usuario logueado
+
+        //    await _context.SaveChangesAsync();
+        //    return NoContent();  // 204 Success
+        //}
         [HttpPut("actualizar_producto/{codigo}")]
-        public async Task<IActionResult> ActualizarProducto(string codigo, [FromBody] ProductoDto productoDto)
+        public async Task<IActionResult> ActualizarProducto(string codigo, [FromBody] ProductoUpsertDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var producto = await _context.Productos
+                .Include(p => p.ProductoProveedores)
                 .FirstOrDefaultAsync(p => p.Codigo == codigo && p.Activo);
 
             if (producto == null)
-                return NotFound( new { mensaje = "Producto no encontrado" });
+                return NotFound(new { mensaje = "Producto no encontrado" });
 
-            // Actualiza propiedades
-            producto.Nombre = productoDto.Nombre;
-            producto.Descripcion = productoDto.Descripcion;
-            producto.PrecioCompra = productoDto.PrecioCompra;
-            producto.PrecioVenta = productoDto.PrecioVenta;
-            producto.Stock = productoDto.Stock;
-            producto.StockMinimo = productoDto.StockMinimo;
-            producto.Categoria = productoDto.Categoria;
-            producto.Proveedor = productoDto.Proveedor;
+            producto.Nombre = dto.Nombre;
+            producto.Descripcion = dto.Descripcion;
+            producto.Costo = dto.Costo;
+            producto.Precio = dto.Precio;
+            producto.Stock = dto.Stock;
+            producto.StockMinimo = dto.StockMinimo;
+            producto.IdCategoria = dto.IdCategoria;
+            producto.IdMarca = dto.IdMarca;
+            producto.IdUnidadMedida = dto.IdUnidadMedida;
             producto.FechaModificacion = DateTime.UtcNow;
-            producto.IdUsuarioModificacion = 1;  // Usuario logueado
+            producto.IdUsuarioModificacion = 1;
+
+            var proveedoresNuevos = dto.IdsProveedores?.Distinct().ToHashSet() ?? new HashSet<int>();
+
+            var eliminar = producto.ProductoProveedores
+                .Where(pp => !proveedoresNuevos.Contains(pp.IdProveedor))
+                .ToList();
+
+            foreach (var item in eliminar)
+            {
+                producto.ProductoProveedores.Remove(item);
+            }
+
+            var proveedoresActuales = producto.ProductoProveedores
+                .Select(pp => pp.IdProveedor)
+                .ToHashSet();
+
+            foreach (var idProveedor in proveedoresNuevos.Except(proveedoresActuales))
+            {
+                producto.ProductoProveedores.Add(new ProductoProveedor
+                {
+                    IdProducto = producto.Id,
+                    IdProveedor = idProveedor
+                });
+            }
 
             await _context.SaveChangesAsync();
-            return NoContent();  // 204 Success
+            return NoContent();
         }
 
         // Soft delete - marca como inactivo

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PuntoVentaInventario.Data;
 
@@ -11,9 +12,11 @@ using PuntoVentaInventario.Data;
 namespace PuntoVentaInventario.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260408215119_AddStoreProcedures")]
+    partial class AddStoreProcedures
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,30 +24,6 @@ namespace PuntoVentaInventario.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("PuntoVentaInventario.Models.Categoria", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Activo")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Nombre")
-                        .IsUnique();
-
-                    b.ToTable("Categorias");
-                });
 
             modelBuilder.Entity("PuntoVentaInventario.Models.DetalleVenta", b =>
                 {
@@ -129,30 +108,6 @@ namespace PuntoVentaInventario.Migrations
                     b.ToTable("GenerarVentasDto");
                 });
 
-            modelBuilder.Entity("PuntoVentaInventario.Models.Marca", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Activo")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Nombre")
-                        .IsUnique();
-
-                    b.ToTable("Marcas");
-                });
-
             modelBuilder.Entity("PuntoVentaInventario.Models.Producto", b =>
                 {
                     b.Property<int>("Id")
@@ -164,13 +119,14 @@ namespace PuntoVentaInventario.Migrations
                     b.Property<bool>("Activo")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Categoria")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("Codigo")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
-
-                    b.Property<decimal>("Costo")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Descripcion")
                         .HasMaxLength(500)
@@ -184,15 +140,6 @@ namespace PuntoVentaInventario.Migrations
 
                     b.Property<DateTime?>("FechaModificacion")
                         .HasColumnType("datetime2");
-
-                    b.Property<int?>("IdCategoria")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("IdMarca")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("IdUnidadMedida")
-                        .HasColumnType("int");
 
                     b.Property<int>("IdUsuarioCreacion")
                         .HasColumnType("int");
@@ -208,25 +155,26 @@ namespace PuntoVentaInventario.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<decimal>("Precio")
+                    b.Property<decimal>("PrecioCompra")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("Stock")
-                        .HasColumnType("decimal(18,3)");
+                    b.Property<decimal>("PrecioVenta")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("StockMinimo")
-                        .HasColumnType("decimal(18,3)");
+                    b.Property<string>("Proveedor")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("Stock")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StockMinimo")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Codigo")
                         .IsUnique();
-
-                    b.HasIndex("IdCategoria");
-
-                    b.HasIndex("IdMarca");
-
-                    b.HasIndex("IdUnidadMedida");
 
                     b.ToTable("Productos");
                 });
@@ -240,9 +188,6 @@ namespace PuntoVentaInventario.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Costo")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("Descripcion")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -254,7 +199,10 @@ namespace PuntoVentaInventario.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Precio")
+                    b.Property<decimal>("PrecioCompra")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PrecioVenta")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Proveedor")
@@ -267,88 +215,6 @@ namespace PuntoVentaInventario.Migrations
                         .HasColumnType("int");
 
                     b.ToTable("ProductosDto");
-                });
-
-            modelBuilder.Entity("PuntoVentaInventario.Models.ProductoProveedor", b =>
-                {
-                    b.Property<int>("IdProducto")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdProveedor")
-                        .HasColumnType("int");
-
-                    b.HasKey("IdProducto", "IdProveedor");
-
-                    b.HasIndex("IdProveedor");
-
-                    b.ToTable("ProductoProveedores");
-                });
-
-            modelBuilder.Entity("PuntoVentaInventario.Models.Proveedor", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Activo")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Contacto")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Correo")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Telefono")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Nombre");
-
-                    b.ToTable("Proveedores");
-                });
-
-            modelBuilder.Entity("PuntoVentaInventario.Models.UnidadMedida", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Activo")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Clave")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<bool>("PermiteDecimales")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Clave")
-                        .IsUnique();
-
-                    b.ToTable("UnidadesMedida");
                 });
 
             modelBuilder.Entity("PuntoVentaInventario.Models.Venta", b =>
@@ -409,74 +275,6 @@ namespace PuntoVentaInventario.Migrations
                     b.Navigation("Producto");
 
                     b.Navigation("Venta");
-                });
-
-            modelBuilder.Entity("PuntoVentaInventario.Models.Producto", b =>
-                {
-                    b.HasOne("PuntoVentaInventario.Models.Categoria", "Categoria")
-                        .WithMany("Productos")
-                        .HasForeignKey("IdCategoria")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("PuntoVentaInventario.Models.Marca", "Marca")
-                        .WithMany("Productos")
-                        .HasForeignKey("IdMarca")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("PuntoVentaInventario.Models.UnidadMedida", "UnidadMedida")
-                        .WithMany("Productos")
-                        .HasForeignKey("IdUnidadMedida")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Categoria");
-
-                    b.Navigation("Marca");
-
-                    b.Navigation("UnidadMedida");
-                });
-
-            modelBuilder.Entity("PuntoVentaInventario.Models.ProductoProveedor", b =>
-                {
-                    b.HasOne("PuntoVentaInventario.Models.Producto", "Producto")
-                        .WithMany("ProductoProveedores")
-                        .HasForeignKey("IdProducto")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PuntoVentaInventario.Models.Proveedor", "Proveedor")
-                        .WithMany("ProductoProveedores")
-                        .HasForeignKey("IdProveedor")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Producto");
-
-                    b.Navigation("Proveedor");
-                });
-
-            modelBuilder.Entity("PuntoVentaInventario.Models.Categoria", b =>
-                {
-                    b.Navigation("Productos");
-                });
-
-            modelBuilder.Entity("PuntoVentaInventario.Models.Marca", b =>
-                {
-                    b.Navigation("Productos");
-                });
-
-            modelBuilder.Entity("PuntoVentaInventario.Models.Producto", b =>
-                {
-                    b.Navigation("ProductoProveedores");
-                });
-
-            modelBuilder.Entity("PuntoVentaInventario.Models.Proveedor", b =>
-                {
-                    b.Navigation("ProductoProveedores");
-                });
-
-            modelBuilder.Entity("PuntoVentaInventario.Models.UnidadMedida", b =>
-                {
-                    b.Navigation("Productos");
                 });
 
             modelBuilder.Entity("PuntoVentaInventario.Models.Venta", b =>
