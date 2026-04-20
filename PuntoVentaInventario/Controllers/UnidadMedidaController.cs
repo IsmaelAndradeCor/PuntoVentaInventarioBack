@@ -69,8 +69,8 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
-        [HttpPost("crear_proveedor")]
-        public async Task<IActionResult> CrearProveedor([FromBody] UnidadMedidaUpsertDto dto)
+        [HttpPost("crear_unidad_medida")]
+        public async Task<IActionResult> CrearUnidadMedida([FromBody] UnidadMedidaUpsertDto dto)
         {
             try
             {
@@ -79,13 +79,13 @@ namespace PuntoVentaInventario.Controllers
 
                 var nombreNormalizado = dto.Nombre.Trim();
                 if (string.IsNullOrWhiteSpace(nombreNormalizado))
-                    return BadRequest(new { mensaje = "El nombre de del proveedor es obligatorio" });
+                    return BadRequest(new { mensaje = "El nombre de la unidad de medida es obligatorio" });
 
-                var existe = await _context.Proveedores
+                var existe = await _context.UnidadesMedida
                     .AnyAsync(p => p.Activo && p.Nombre.ToLower() == nombreNormalizado.ToLower());
                 if (existe)
                 {
-                    return BadRequest(new { mensaje = "Ya existe un proveedor con ese nombre" });
+                    return BadRequest(new { mensaje = "Ya existe una unidad de medida con ese nombre" });
                 }
 
                 var unidadMedida = new UnidadMedida
@@ -101,17 +101,17 @@ namespace PuntoVentaInventario.Controllers
 
                 var response = new UnidadMedidaResponseDto
                 {
-                    Id = proveedor.Id,
-                    Nombre = proveedor.Nombre,
-                    Clave = proveedor.Clave,
-                    PermiteDecimales = proveedor
+                    Id = unidadMedida.Id,
+                    Nombre = unidadMedida.Nombre,
+                    Clave = unidadMedida.Clave,
+                    PermiteDecimales = unidadMedida.PermiteDecimales
                 };
 
-                return CreatedAtAction(nameof(GetProveedorPorId), new { id = proveedor.Id }, response);
+                return CreatedAtAction(nameof(GetUnidadMedidaPorId), new { id = unidadMedida.Id }, response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al crear el proveedor: {ex.Message}");
+                return StatusCode(500, $"Error al crear la unidad de medida: {ex.Message}");
             }
         }
     }

@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using PuntoVentaInventario.Data;
+using PuntoVentaInventario.Models.Dtos.Responses;
 using PuntoVentaInventario.Models.Entities;
 using System.Data;
 
@@ -21,39 +22,84 @@ namespace PuntoVentaInventario.Controllers
             _context = context;  // ← Inyecta
         }
 
-        // Obtiene todos los productos activos
+        //// Obtiene todos los productos activos
+        //[HttpGet("listar_productos")]
+        //public async Task<IActionResult> GetProductos()
+        //{
+        //    try
+        //    {
+        //        var productos = await _context.ProductosDto
+        //            .FromSqlRaw("EXEC SP_ProductosListar")
+        //            .ToListAsync();
+
+        //        return Ok(productos);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Error al obtener los productos: {ex.Message}");
+        //    }
+        //    //var productos = await _context.Productos
+        //    //    .Where(p => p.Activo)
+        //    //    .Select(p => new ProductoDto  // ← Mapeo directo EF → DTO
+        //    //    {
+        //    //        Id = p.Id,
+        //    //        Codigo = p.Codigo,
+        //    //        Nombre = p.Nombre,
+        //    //        Descripcion = p.Descripcion,
+        //    //        PrecioCompra = p.PrecioCompra,
+        //    //        PrecioVenta = p.PrecioVenta,
+        //    //        Stock = p.Stock,
+        //    //        StockMinimo = p.StockMinimo,
+        //    //        Categoria = p.Categoria,
+        //    //        Proveedor = p.Proveedor
+        //    //    })
+        //    //    .ToListAsync();
+        //    //return Ok(productos);
+        //}
         [HttpGet("listar_productos")]
         public async Task<IActionResult> GetProductos()
         {
             try
             {
-                var productos = await _context.ProductosDto
-                    .FromSqlRaw("EXEC SP_ProductosListar")
+                var productos = await _context.Productos
+                    .Where(m => m.Activo)
+                    .OrderBy(m => m.Nombre)
+                    .Select(m => new ProductoResponseDto
+                    {
+                        Id = m.Id,
+                        Codigo = m.Codigo,
+                        Nombre = m.Nombre,
+                        Descripcion = m.Descripcion,
+                        Costo = m.Costo,
+                        Precio = m.Precio,
+                        Stock = m.Stock,
+                        StockMinimo = m.StockMinimo,
+                        IdCategoria = m.IdCategoria,
+                        Categoria = m.Categoria != null ? m.Categoria.Nombre : null,
+                        IdMarca = m.IdMarca,
+                        Marca = m.Marca != null ? m.Marca.Nombre : null,
+                        IdUnidadMedida = m.IdUnidadMedida,
+                        UnidadMedida = m.UnidadMedida != null ? m.UnidadMedida.Nombre : null,
+                        IdsProveedores = m.ProductoProveedores.Select(pp => pp.IdProveedor).ToList(),
+                        Proveedores = m.ProductoProveedores
+                        .Select(pp => new ProveedorResponseDto
+                        {
+                            Id = pp.Proveedor.Id,
+                            Nombre = pp.Proveedor.Nombre,
+                            Contacto = pp.Proveedor.Contacto,
+                            Telefono = pp.Proveedor.Telefono,
+                            Correo = pp.Proveedor.Correo
+                        })
+                        .ToList()
+                    })
                     .ToListAsync();
 
                 return Ok(productos);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener los productos: {ex.Message}");
+                return StatusCode(500, $"Error al obtener productos: {ex.Message}");
             }
-            //var productos = await _context.Productos
-            //    .Where(p => p.Activo)
-            //    .Select(p => new ProductoDto  // ← Mapeo directo EF → DTO
-            //    {
-            //        Id = p.Id,
-            //        Codigo = p.Codigo,
-            //        Nombre = p.Nombre,
-            //        Descripcion = p.Descripcion,
-            //        PrecioCompra = p.PrecioCompra,
-            //        PrecioVenta = p.PrecioVenta,
-            //        Stock = p.Stock,
-            //        StockMinimo = p.StockMinimo,
-            //        Categoria = p.Categoria,
-            //        Proveedor = p.Proveedor
-            //    })
-            //    .ToListAsync();
-            //return Ok(productos);
         }
 
         /// <summary>
@@ -110,7 +156,16 @@ namespace PuntoVentaInventario.Controllers
                     IdUnidadMedida = p.IdUnidadMedida,
                     UnidadMedida = p.UnidadMedida != null ? p.UnidadMedida.Nombre : null,
                     IdsProveedores = p.ProductoProveedores.Select(pp => pp.IdProveedor).ToList(),
-                    Proveedores = p.ProductoProveedores.Select(pp => pp.Proveedor.Nombre).ToList()
+                    Proveedores = p.ProductoProveedores
+                        .Select(pp => new ProveedorResponseDto
+                        {
+                            Id = pp.Proveedor.Id,
+                            Nombre = pp.Proveedor.Nombre,
+                            Contacto = pp.Proveedor.Contacto,
+                            Telefono = pp.Proveedor.Telefono,
+                            Correo = pp.Proveedor.Correo
+                        })
+                        .ToList()
                 })
                 .FirstOrDefaultAsync();
 
