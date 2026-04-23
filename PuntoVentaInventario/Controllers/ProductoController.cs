@@ -74,13 +74,30 @@ namespace PuntoVentaInventario.Controllers
                         Precio = m.Precio,
                         Stock = m.Stock,
                         StockMinimo = m.StockMinimo,
-                        IdCategoria = m.IdCategoria,
-                        Categoria = m.Categoria != null ? m.Categoria.Nombre : null,
-                        IdMarca = m.IdMarca,
-                        Marca = m.Marca != null ? m.Marca.Nombre : null,
-                        IdUnidadMedida = m.IdUnidadMedida,
-                        UnidadMedida = m.UnidadMedida != null ? m.UnidadMedida.Nombre : null,
-                        IdsProveedores = m.ProductoProveedores.Select(pp => pp.IdProveedor).ToList(),
+                        //IdCategoria = m.IdCategoria,
+                        //Categoria = m.Categoria != null ? m.Categoria.Nombre : null,
+                        //IdMarca = m.IdMarca,
+                        //Marca = m.Marca != null ? m.Marca.Nombre : null,
+                        Categoria = m.Categoria == null ? null : new CategoriaResponseDto
+                        {
+                            Id = m.Categoria.Id,
+                            Nombre = m.Categoria.Nombre
+                        },
+                        Marca = m.Marca == null ? null : new MarcaResponseDto
+                        {
+                            Id = m.Marca.Id,
+                            Nombre = m.Marca.Nombre
+                        },
+                        UnidadMedida = m.UnidadMedida == null ? null : new UnidadMedidaResponseDto
+                        {
+                            Id = m.UnidadMedida.Id,
+                            Nombre = m.UnidadMedida.Nombre,
+                            Clave = m.UnidadMedida.Clave,
+                            PermiteDecimales = m.UnidadMedida.PermiteDecimales
+                        },
+                        //IdUnidadMedida = m.IdUnidadMedida,
+                        //UnidadMedida = m.UnidadMedida != null ? m.UnidadMedida.Nombre : null,
+                        //IdsProveedores = m.ProductoProveedores.Select(pp => pp.IdProveedor).ToList(),
                         Proveedores = m.ProductoProveedores
                         .Select(pp => new ProveedorResponseDto
                         {
@@ -149,13 +166,31 @@ namespace PuntoVentaInventario.Controllers
                     Precio = p.Precio,
                     Stock = p.Stock,
                     StockMinimo = p.StockMinimo,
-                    IdCategoria = p.IdCategoria,
-                    Categoria = p.Categoria != null ? p.Categoria.Nombre : null,
-                    IdMarca = p.IdMarca,
-                    Marca = p.Marca != null ? p.Marca.Nombre : null,
-                    IdUnidadMedida = p.IdUnidadMedida,
-                    UnidadMedida = p.UnidadMedida != null ? p.UnidadMedida.Nombre : null,
-                    IdsProveedores = p.ProductoProveedores.Select(pp => pp.IdProveedor).ToList(),
+                    //IdCategoria = p.IdCategoria,
+                    //Categoria = p.Categoria != null ? p.Categoria.Nombre : null,
+                    //IdMarca = p.IdMarca,
+                    //Marca = p.Marca != null ? p.Marca.Nombre : null,
+                    Categoria = p.Categoria == null ? null : new CategoriaResponseDto
+                    {
+                        Id = p.Categoria.Id,
+                        Nombre = p.Categoria.Nombre
+                    },
+                    Marca = p.Marca == null ? null : new MarcaResponseDto
+                    {
+                        Id = p.Marca.Id,
+                        Nombre = p.Marca.Nombre
+                    },
+                    UnidadMedida = p.UnidadMedida == null ? null : new UnidadMedidaResponseDto
+                    {
+                        Id = p.UnidadMedida.Id,
+                        Nombre = p.UnidadMedida.Nombre,
+                        Clave = p.UnidadMedida.Clave,
+                        PermiteDecimales = p.UnidadMedida.PermiteDecimales
+                    },
+                    //IdUnidadMedida = p.IdUnidadMedida,
+                    //UnidadMedida = p.UnidadMedida != null ? p.UnidadMedida.Nombre : null,
+
+                    //IdsProveedores = p.ProductoProveedores.Select(pp => pp.IdProveedor).ToList(),
                     Proveedores = p.ProductoProveedores
                         .Select(pp => new ProveedorResponseDto
                         {
@@ -238,14 +273,42 @@ namespace PuntoVentaInventario.Controllers
         //    };
         //    return CreatedAtAction(nameof(GetProductoPorCodigo), new { codigo = producto.Codigo }, dto);
         //}
+
+
         [HttpPost("crear_producto")]
         public async Task<IActionResult> InsertarProducto([FromBody] ProductoUpsertDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
 
             if (await _context.Productos.AnyAsync(p => p.Codigo == dto.Codigo))
-                return BadRequest(new { mensaje = "Código ya existe" });
+            {
+                ModelState.AddModelError(nameof(dto.Codigo), "El código ya existe.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errores = ModelState
+                    .Where(x => x.Value?.Errors.Count > 0)
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                    );
+
+                return BadRequest(new
+                {
+                    mensaje = "Errores de validación",
+                    errors = errores
+                });
+            }
+
+            //if (await _context.Productos.AnyAsync(p => p.Codigo == dto.Codigo))
+            //    return BadRequest(new
+            //    {
+            //        mensaje = "Errores de validación",
+            //        errors = new Dictionary<string, string[]>
+            //        {
+            //            { nameof(dto.Codigo), new[] { "El código ya existe." } }
+            //        }
+            //    });
 
             var producto = new Producto
             {
@@ -282,7 +345,8 @@ namespace PuntoVentaInventario.Controllers
             return CreatedAtAction(nameof(GetProductoPorCodigo), new { codigo = producto.Codigo }, new
             {
                 producto.Id,
-                producto.Codigo
+                producto.Codigo,
+                producto.Nombre
             });
         }
 

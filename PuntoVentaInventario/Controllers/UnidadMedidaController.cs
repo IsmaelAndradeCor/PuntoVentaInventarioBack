@@ -8,6 +8,8 @@ using PuntoVentaInventario.Models.Entities;
 
 namespace PuntoVentaInventario.Controllers
 {
+    [ApiController]
+    [Route("api/[controller]")]
     public class UnidadMedidaController : ControllerBase
     {
         private readonly AppDbContext _context;

@@ -111,7 +111,7 @@ namespace PuntoVentaInventario.Controllers
         }
 
         [HttpPut("actualizar_marca/{id:int}")]
-        public async Task<IActionResult> ActualizarMarca(int id, [FromBody] MarcaUpsertDto dto)
+        public async Task<ActionResult<MarcaResponseDto>> ActualizarMarca(int id, [FromBody] MarcaUpsertDto dto)
         {
             try
             {
@@ -139,7 +139,13 @@ namespace PuntoVentaInventario.Controllers
 
                 await _context.SaveChangesAsync();
 
-                return NoContent();
+                var response = new MarcaResponseDto
+                {
+                    Id = marcaDb.Id,
+                    Nombre = marcaDb.Nombre
+                };
+
+                return Ok(response);
             }
             catch (Exception ex)
             {
