@@ -9,7 +9,6 @@ namespace PuntoVentaInventario.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<Producto> Productos { get; set; }
-        public DbSet<ProductoDto> ProductosDto { get; set; }
         public DbSet<Venta> Ventas { get; set; }
         public DbSet<DetalleVenta> DetalleVentas { get; set; }
         public DbSet<GenerarVentasDto> GenerarVentasDto { get; set; }
@@ -106,7 +105,6 @@ namespace PuntoVentaInventario.Data
                 .WithMany(p => p.ProductoProveedores)
                 .HasForeignKey(pp => pp.IdProveedor);
 
-            modelBuilder.Entity<ProductoDto>().HasNoKey();
             modelBuilder.Entity<GenerarVentasDto>().HasNoKey();
         }
     }

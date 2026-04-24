@@ -140,29 +140,6 @@ namespace PuntoVentaInventario.Migrations
             ", suppressTransaction: true);
 
             migrationBuilder.Sql(@"
-            CREATE OR ALTER PROCEDURE [dbo].[sp_ProductosObtenerStockMinimo]
-            AS
-            BEGIN
-                SET NOCOUNT ON;
-
-                SELECT
-                    Id,
-                    Codigo,
-                    Nombre,
-                    Descripcion,
-                    PrecioCompra,
-                    PrecioVenta,
-                    Stock,
-                    StockMinimo,
-                    Categoria,
-                    Proveedor
-                FROM Productos
-                WHERE Stock <= StockMinimo
-                  AND Activo = 1;
-            END
-            ", suppressTransaction: true);
-
-            migrationBuilder.Sql(@"
             CREATE OR ALTER PROCEDURE [dbo].[sp_RegistrarVenta]
                 @Folio NVARCHAR(20),
                 @IdUsuario INT,

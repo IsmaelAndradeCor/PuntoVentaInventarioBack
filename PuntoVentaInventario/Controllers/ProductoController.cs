@@ -215,16 +215,74 @@ namespace PuntoVentaInventario.Controllers
         {
             try
             {
-                var productos = await _context.ProductosDto
-                    .FromSqlRaw("sp_ProductosObtenerStockMinimo")
+                var productos = await _context.Productos
+                    .Where(m => m.Activo && m.Stock <= m.StockMinimo)
+                    .OrderBy(m => m.Nombre)
+                    .Select(m => new ProductoResponseDto
+                    {
+                        Id = m.Id,
+                        Codigo = m.Codigo,
+                        Nombre = m.Nombre,
+                        Descripcion = m.Descripcion,
+                        Costo = m.Costo,
+                        Precio = m.Precio,
+                        Stock = m.Stock,
+                        StockMinimo = m.StockMinimo,
+                        //IdCategoria = m.IdCategoria,
+                        //Categoria = m.Categoria != null ? m.Categoria.Nombre : null,
+                        //IdMarca = m.IdMarca,
+                        //Marca = m.Marca != null ? m.Marca.Nombre : null,
+                        Categoria = m.Categoria == null ? null : new CategoriaResponseDto
+                        {
+                            Id = m.Categoria.Id,
+                            Nombre = m.Categoria.Nombre
+                        },
+                        Marca = m.Marca == null ? null : new MarcaResponseDto
+                        {
+                            Id = m.Marca.Id,
+                            Nombre = m.Marca.Nombre
+                        },
+                        UnidadMedida = m.UnidadMedida == null ? null : new UnidadMedidaResponseDto
+                        {
+                            Id = m.UnidadMedida.Id,
+                            Nombre = m.UnidadMedida.Nombre,
+                            Clave = m.UnidadMedida.Clave,
+                            PermiteDecimales = m.UnidadMedida.PermiteDecimales
+                        },
+                        //IdUnidadMedida = m.IdUnidadMedida,
+                        //UnidadMedida = m.UnidadMedida != null ? m.UnidadMedida.Nombre : null,
+                        //IdsProveedores = m.ProductoProveedores.Select(pp => pp.IdProveedor).ToList(),
+                        Proveedores = m.ProductoProveedores
+                        .Select(pp => new ProveedorResponseDto
+                        {
+                            Id = pp.Proveedor.Id,
+                            Nombre = pp.Proveedor.Nombre,
+                            Contacto = pp.Proveedor.Contacto,
+                            Telefono = pp.Proveedor.Telefono,
+                            Correo = pp.Proveedor.Correo
+                        })
+                        .ToList()
+                    })
                     .ToListAsync();
 
                 return Ok(productos);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al registrar la venta: {ex.Message}");
+                return StatusCode(500, $"Error al obtener productos: {ex.Message}");
             }
+            //try
+            //{
+            //    var productos = await _context.Productos
+            //        .FromSqlRaw("sp_ProductosObtenerStockMinimo")
+            //        .ToListAsync();
+
+            //    return Ok(productos);
+            //}
+            //catch (Exception ex)
+            //{
+            //    return StatusCode(500, $"Error al obtener los productos con stock minimo: {ex.Message}");
+            //}
         }
 
         //// Inserta nuevo producto
@@ -378,15 +436,17 @@ namespace PuntoVentaInventario.Controllers
         //    await _context.SaveChangesAsync();
         //    return NoContent();  // 204 Success
         //}
-        [HttpPut("actualizar_producto/{codigo}")]
-        public async Task<IActionResult> ActualizarProducto(string codigo, [FromBody] ProductoUpsertDto dto)
+        //[HttpPut("actualizar_producto/{codigo}")]
+        //public async Task<IActionResult> ActualizarProducto(string codigo, [FromBody] ProductoUpsertDto dto)
+        [HttpPut("actualizar_producto")]
+        public async Task<IActionResult> ActualizarProducto([FromBody] ProductoUpsertDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var producto = await _context.Productos
                 .Include(p => p.ProductoProveedores)
-                .FirstOrDefaultAsync(p => p.Codigo == codigo && p.Activo);
+                .FirstOrDefaultAsync(p => p.Codigo == dto.Codigo && p.Activo);
 
             if (producto == null)
                 return NotFound(new { mensaje = "Producto no encontrado" });
