@@ -174,11 +174,11 @@ namespace PuntoVentaInventario.Migrations
                         t.c.value('(IdProducto)[1]', 'INT'),
                         t.c.value('(Codigo)[1]', 'NVARCHAR(50)'),
                         t.c.value('(Nombre)[1]', 'NVARCHAR(100)'),
-                        t.c.value('(Cantidad)[1]', 'INT'),
-                        t.c.value('(Costo)[1]', 'DECIMAL(10,2)'),
-                        t.c.value('(Cantidad)[1]', 'INT') * t.c.value('(Costo)[1]', 'DECIMAL(10,2)'),
-                        t.c.value('(Precio)[1]', 'DECIMAL(10,2)'),
-                        t.c.value('(Cantidad)[1]', 'INT') * t.c.value('(Precio)[1]', 'DECIMAL(10,2)')
+                        t.c.value('(Cantidad)[1]', 'DECIMAL(18,2)'),
+                        t.c.value('(Costo)[1]', 'DECIMAL(18,2)'),
+                        t.c.value('(Cantidad)[1]', 'DECIMAL(18,2)') * t.c.value('(Costo)[1]', 'DECIMAL(18,2)'),
+                        t.c.value('(Precio)[1]', 'DECIMAL(18,2)'),
+                        t.c.value('(Cantidad)[1]', 'DECIMAL(18,2)') * t.c.value('(Precio)[1]', 'DECIMAL(18,2)')
                     FROM @Detalle.nodes('/Items/Item') t(c);
 
                     UPDATE p
@@ -205,7 +205,6 @@ namespace PuntoVentaInventario.Migrations
             migrationBuilder.Sql(@"DROP PROCEDURE IF EXISTS [dbo].[sp_ProductosInsertar];", suppressTransaction: true);
             migrationBuilder.Sql(@"DROP PROCEDURE IF EXISTS [dbo].[sp_ProductosListar];", suppressTransaction: true);
             migrationBuilder.Sql(@"DROP PROCEDURE IF EXISTS [dbo].[sp_ProductosObtener];", suppressTransaction: true);
-            migrationBuilder.Sql(@"DROP PROCEDURE IF EXISTS [dbo].[sp_ProductosObtenerStockMinimo];", suppressTransaction: true);
             migrationBuilder.Sql(@"DROP PROCEDURE IF EXISTS [dbo].[sp_RegistrarVenta];", suppressTransaction: true);
         }
     }

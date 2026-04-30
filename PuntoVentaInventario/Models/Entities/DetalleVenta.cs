@@ -20,7 +20,8 @@ namespace PuntoVentaInventario.Models.Entities
         [Required, MaxLength(100)]
         public string NombreProducto { get; set; } = string.Empty;
 
-        public int Cantidad { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Cantidad { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal CostoUnitario { get; set; }
