@@ -492,11 +492,11 @@ namespace PuntoVentaInventario.Controllers
         }
 
         // Soft delete - marca como inactivo
-        [HttpDelete("eliminar_producto/{codigo}")]
-        public async Task<IActionResult> EliminarProducto(string codigo)
+        [HttpDelete("eliminar_producto/{idProducto}")]
+        public async Task<IActionResult> EliminarProducto(int idProducto)
         {
             var producto = await _context.Productos
-                .FirstOrDefaultAsync(p => p.Codigo == codigo && p.Activo);
+                .FirstOrDefaultAsync(p => p.Id == idProducto && p.Activo);
 
             if (producto == null)
                 return NotFound("Producto no encontrado");

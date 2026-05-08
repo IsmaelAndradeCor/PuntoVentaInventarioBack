@@ -111,7 +111,7 @@ namespace PuntoVentaInventario.Controllers
         }
 
         [HttpPut("actualizar_categoria/{id:int}")]
-        public async Task<IActionResult> ActualizarCategoria(int id, [FromBody] CategoriaUpsertDto dto)
+        public async Task<ActionResult<CategoriaResponseDto>> ActualizarCategoria(int id, [FromBody] CategoriaUpsertDto dto)
         {
             try
             {
@@ -139,7 +139,13 @@ namespace PuntoVentaInventario.Controllers
 
                 await _context.SaveChangesAsync();
 
-                return NoContent();
+                var response = new CategoriaResponseDto
+                {
+                    Id = categoria.Id,
+                    Nombre = categoria.Nombre
+                };
+
+                return Ok(response);
             }
             catch (Exception ex)
             {
