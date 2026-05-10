@@ -1,0 +1,11 @@
+select * from Productos
+SELECT * FROM Proveedores
+select * from ProductoProveedores
+select * from Ventas
+SELECT * FROM DetalleVentas
+
+SELECT * FROM Marcas
+SELECT * FROM Categorias
+SELECT * FROM UnidadesMedida
+
+

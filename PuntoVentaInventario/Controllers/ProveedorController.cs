@@ -116,5 +116,82 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [HttpPut("actualizar_proveedor/{idProveedor:int}")]
+        public async Task<ActionResult<ProveedorResponseDto>> ActualizarProveedor(int idProveedor, [FromBody] ProveedorUpsertDto dto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                var proveedor = await _context.Proveedores
+                    .FirstOrDefaultAsync(u => u.Id == idProveedor && u.Activo);
+
+                if (proveedor == null)
+                    return NotFound(new { mensaje = "Proveedor no encontrado" });
+
+                var nombreNormalizado = dto.Nombre.Trim();
+
+                if (string.IsNullOrWhiteSpace(nombreNormalizado))
+                    return BadRequest(new { mensaje = "El nombre del Proveedor es obligatorio" });
+
+                var existe = await _context.Proveedores
+                    .AnyAsync(m => m.Id != idProveedor && m.Activo && m.Nombre.ToLower() == nombreNormalizado.ToLower());
+
+                if (existe)
+                    return BadRequest(new { mensaje = "Ya existe otro Proveedor con ese nombre" });
+
+                proveedor.Nombre = nombreNormalizado;
+                proveedor.Contacto = dto.Contacto?.Trim();
+                proveedor.Telefono = dto.Telefono?.Trim();
+                proveedor.Correo = dto.Correo?.Trim();
+
+                await _context.SaveChangesAsync();
+
+                var response = new ProveedorResponseDto
+                {
+                    Id = proveedor.Id,
+                    Nombre = proveedor.Nombre,
+                    Contacto = proveedor.Contacto,
+                    Telefono = proveedor.Telefono,
+                    Correo = proveedor.Correo
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al actualizar el Proveedor: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("eliminar_proveedor/{idProveedor:int}")]
+        public async Task<IActionResult> EliminarProveedor(int idProveedor)
+        {
+            try
+            {
+                var proveedor = await _context.Proveedores
+                    .FirstOrDefaultAsync(m => m.Id == idProveedor && m.Activo);
+
+                if (proveedor == null)
+                    return NotFound(new { mensaje = "Proveedor no encontrado" });
+
+                var tieneProductos = await _context.ProductoProveedores
+                    .AnyAsync(p => p.IdProveedor == idProveedor);
+
+                if (tieneProductos)
+                    return BadRequest(new { mensaje = "No se puede eliminar al Proveedor porque tiene Productos asociados" });
+
+                proveedor.Activo = false;
+
+                await _context.SaveChangesAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al eliminar al Proveedor: {ex.Message}");
+            }
+        }
     }
 }

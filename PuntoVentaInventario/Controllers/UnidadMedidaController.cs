@@ -116,5 +116,81 @@ namespace PuntoVentaInventario.Controllers
                 return StatusCode(500, $"Error al crear la unidad de medida: {ex.Message}");
             }
         }
+
+        [HttpPut("actualizar_unidad_medida/{idUnidadMedida:int}")]
+        public async Task<ActionResult<UnidadMedidaResponseDto>> ActualizarUnidadMedida(int idUnidadMedida, [FromBody] UnidadMedidaUpsertDto dto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                var unidadMedida = await _context.UnidadesMedida
+                    .FirstOrDefaultAsync(u => u.Id == idUnidadMedida && u.Activo);
+
+                if (unidadMedida == null)
+                    return NotFound(new { mensaje = "Unidad de Medida no encontrada" });
+
+                var nombreNormalizado = dto.Nombre.Trim();
+
+                if (string.IsNullOrWhiteSpace(nombreNormalizado))
+                    return BadRequest(new { mensaje = "El nombre de la unidad de medida es obligatorio" });
+
+                var existe = await _context.UnidadesMedida
+                    .AnyAsync(m => m.Id != idUnidadMedida && m.Activo && m.Nombre.ToLower() == nombreNormalizado.ToLower());
+
+                if (existe)
+                    return BadRequest(new { mensaje = "Ya existe otra unidad de medida con ese nombre" });
+
+                unidadMedida.Nombre = nombreNormalizado;
+                unidadMedida.Clave = dto.Clave.Trim();
+                unidadMedida.PermiteDecimales = dto.PermiteDecimales;
+
+                await _context.SaveChangesAsync();
+
+                var response = new UnidadMedidaResponseDto
+                {
+                    Id = unidadMedida.Id,
+                    Nombre = unidadMedida.Nombre,
+                    Clave = unidadMedida.Clave,
+                    PermiteDecimales = unidadMedida.PermiteDecimales
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al actualizar la unidad de medida: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("eliminar_unidad_medida/{idUnidadMedida:int}")]
+        public async Task<IActionResult> EliminarUnidadMedida(int idUnidadMedida)
+        {
+            try
+            {
+                var unidadMedida = await _context.UnidadesMedida
+                    .FirstOrDefaultAsync(m => m.Id == idUnidadMedida && m.Activo);
+
+                if (unidadMedida == null)
+                    return NotFound(new { mensaje = "Unidad de Medida no encontrada" });
+
+                var tieneProductos = await _context.Productos
+                    .AnyAsync(p => p.IdUnidadMedida == idUnidadMedida && p.Activo);
+
+                if (tieneProductos)
+                    return BadRequest(new { mensaje = "No se puede eliminar la Unidad de Medida porque tiene productos asociados" });
+
+                unidadMedida.Activo = false;
+
+                await _context.SaveChangesAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al eliminar la Unidad de Medida: {ex.Message}");
+            }
+        }
     }
 }
