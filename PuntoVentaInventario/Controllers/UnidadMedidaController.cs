@@ -76,9 +76,6 @@ namespace PuntoVentaInventario.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
                 var nombreNormalizado = dto.Nombre.Trim();
                 if (string.IsNullOrWhiteSpace(nombreNormalizado))
                     return BadRequest(new { mensaje = "El nombre de la unidad de medida es obligatorio" });
@@ -122,9 +119,6 @@ namespace PuntoVentaInventario.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
                 var unidadMedida = await _context.UnidadesMedida
                     .FirstOrDefaultAsync(u => u.Id == idUnidadMedida && u.Activo);
 

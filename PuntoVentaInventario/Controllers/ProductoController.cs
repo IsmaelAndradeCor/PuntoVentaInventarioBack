@@ -342,32 +342,6 @@ namespace PuntoVentaInventario.Controllers
                 ModelState.AddModelError(nameof(dto.Codigo), "El código ya existe.");
             }
 
-            if (!ModelState.IsValid)
-            {
-                var errores = ModelState
-                    .Where(x => x.Value?.Errors.Count > 0)
-                    .ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
-                    );
-
-                return BadRequest(new
-                {
-                    mensaje = "Errores de validación",
-                    errors = errores
-                });
-            }
-
-            //if (await _context.Productos.AnyAsync(p => p.Codigo == dto.Codigo))
-            //    return BadRequest(new
-            //    {
-            //        mensaje = "Errores de validación",
-            //        errors = new Dictionary<string, string[]>
-            //        {
-            //            { nameof(dto.Codigo), new[] { "El código ya existe." } }
-            //        }
-            //    });
-
             var producto = new Producto
             {
                 Codigo = dto.Codigo,
@@ -441,9 +415,6 @@ namespace PuntoVentaInventario.Controllers
         [HttpPut("actualizar_producto")]
         public async Task<IActionResult> ActualizarProducto([FromBody] ProductoUpsertDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var producto = await _context.Productos
                 .Include(p => p.ProductoProveedores)
                 .FirstOrDefaultAsync(p => p.Codigo == dto.Codigo && p.Activo);

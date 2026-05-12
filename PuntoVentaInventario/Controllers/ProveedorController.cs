@@ -73,9 +73,6 @@ namespace PuntoVentaInventario.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
                 var nombreNormalizado = dto.Nombre.Trim();
                 if (string.IsNullOrWhiteSpace(nombreNormalizado))
                     return BadRequest(new { mensaje = "El nombre de del proveedor es obligatorio" });
@@ -121,9 +118,6 @@ namespace PuntoVentaInventario.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
                 var proveedor = await _context.Proveedores
                     .FirstOrDefaultAsync(u => u.Id == idProveedor && u.Activo);
 

@@ -12,8 +12,10 @@ namespace PuntoVentaInventario.Models.Entities
         [Required, MaxLength(10)]
         public string Clave { get; set; } = string.Empty;
 
+        [Required]
         public bool PermiteDecimales { get; set; }
 
+        [Required]
         public bool Activo { get; set; } = true;
 
         public ICollection<Producto> Productos { get; set; } = new List<Producto>();

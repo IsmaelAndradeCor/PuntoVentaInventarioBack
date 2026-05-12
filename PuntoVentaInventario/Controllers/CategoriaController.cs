@@ -73,9 +73,6 @@ namespace PuntoVentaInventario.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
                 var nombreNormalizado = dto.Nombre.Trim();
 
                 if (string.IsNullOrWhiteSpace(nombreNormalizado))
@@ -115,9 +112,6 @@ namespace PuntoVentaInventario.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
                 var categoria = await _context.Categorias
                     .FirstOrDefaultAsync(m => m.Id == id && m.Activo);
 
