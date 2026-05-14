@@ -1,12 +1,7 @@
 {
   "ConnectionStrings": {
     "DefaultConnection": "Server=localhost\\SQLEXPRESS;Database=PuntoVentaInventario;Integrated Security=True;TrustServerCertificate=True;"
-  },
-  "Jwt": {
-    "Key": "ESTA_ES_UNA_CLAVE_SUPER_LARGA_Y_SEGURA_2026_PVI_123456789",
-    "Issuer": "PuntoVentaInventarioAPI",
-    "Audience": "PuntoVentaInventarioClient",
-    "ExpiresInMinutes": 480
+    //"DefaultConnection": "Server=localhost;Database=PuntoVentaInventario;Integrated Security=True;TrustServerCertificate=True;"
   },
   "Logging": {
     "LogLevel": {
@@ -17,6 +12,5 @@
   "Security": {
     "VistaPin": "230815"
   },
-  "AllowedOrigins": "http://localhost:4200",
   "AllowedHosts": "*"
 }
