@@ -36,113 +36,9 @@ namespace PuntoVentaInventario.Migrations
             ", suppressTransaction: true);
 
             migrationBuilder.Sql(@"
-            CREATE OR ALTER PROCEDURE [dbo].[sp_ProductosInsertar]
-                @Codigo VARCHAR(20),
-                @Nombre VARCHAR(100),
-                @Descripcion VARCHAR(255) = NULL,
-                @PrecioCompra DECIMAL(10,2),
-                @PrecioVenta DECIMAL(10,2),
-                @Stock INT = 0,
-                @StockMinimo INT = 0,
-                @Categoria VARCHAR(50) = NULL,
-                @Proveedor VARCHAR(100) = NULL,
-                @IdUsuarioCreacion INT = 1
-            AS
-            BEGIN
-                SET NOCOUNT ON;
-
-                IF EXISTS (SELECT 1 FROM Productos WHERE Codigo = @Codigo)
-                BEGIN
-                    SELECT 0 AS Error;
-                    RETURN;
-                END
-
-                INSERT INTO Productos
-                (
-                    Codigo,
-                    Nombre,
-                    Descripcion,
-                    PrecioCompra,
-                    PrecioVenta,
-                    Stock,
-                    StockMinimo,
-                    Categoria,
-                    Proveedor,
-                    FechaCreacion,
-                    IdUsuarioCreacion,
-                    Activo
-                )
-                VALUES
-                (
-                    @Codigo,
-                    @Nombre,
-                    @Descripcion,
-                    @PrecioCompra,
-                    @PrecioVenta,
-                    @Stock,
-                    @StockMinimo,
-                    @Categoria,
-                    @Proveedor,
-                    GETUTCDATE(),
-                    @IdUsuarioCreacion,
-                    1
-                );
-
-                SELECT CAST(SCOPE_IDENTITY() AS INT) AS NuevoId;
-            END
-            ", suppressTransaction: true);
-
-            migrationBuilder.Sql(@"
-            CREATE OR ALTER PROCEDURE [dbo].[sp_ProductosListar]
-            AS
-            BEGIN
-                SET NOCOUNT ON;
-
-                SELECT 
-                    Id,
-                    Codigo,
-                    Nombre,
-                    Descripcion,
-                    PrecioCompra,
-                    PrecioVenta,
-                    Stock,
-                    StockMinimo,
-                    Categoria,
-                    Proveedor
-                FROM Productos
-                WHERE Activo = 1
-                ORDER BY Nombre;
-            END
-            ", suppressTransaction: true);
-
-            migrationBuilder.Sql(@"
-            CREATE OR ALTER PROCEDURE [dbo].[sp_ProductosObtener]
-                @Codigo VARCHAR(20)
-            AS
-            BEGIN
-                SET NOCOUNT ON;
-
-                SELECT TOP 1
-                    Id,
-                    Codigo,
-                    Nombre,
-                    Descripcion,
-                    PrecioCompra,
-                    PrecioVenta,
-                    Stock,
-                    StockMinimo,
-                    Categoria,
-                    Proveedor
-                FROM Productos
-                WHERE Codigo = @Codigo
-                  AND Activo = 1;
-            END
-            ", suppressTransaction: true);
-
-            migrationBuilder.Sql(@"
             CREATE OR ALTER PROCEDURE [dbo].[sp_RegistrarVenta]
                 @Folio NVARCHAR(20),
-                @IdUsuario INT,
+                @IdUsuario VARCHAR(450),
                 @Total DECIMAL(10,2),
                 @Detalle XML
             AS
@@ -202,9 +98,6 @@ namespace PuntoVentaInventario.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.Sql(@"DROP PROCEDURE IF EXISTS [dbo].[sp_GenerarVentas];", suppressTransaction: true);
-            migrationBuilder.Sql(@"DROP PROCEDURE IF EXISTS [dbo].[sp_ProductosInsertar];", suppressTransaction: true);
-            migrationBuilder.Sql(@"DROP PROCEDURE IF EXISTS [dbo].[sp_ProductosListar];", suppressTransaction: true);
-            migrationBuilder.Sql(@"DROP PROCEDURE IF EXISTS [dbo].[sp_ProductosObtener];", suppressTransaction: true);
             migrationBuilder.Sql(@"DROP PROCEDURE IF EXISTS [dbo].[sp_RegistrarVenta];", suppressTransaction: true);
         }
     }

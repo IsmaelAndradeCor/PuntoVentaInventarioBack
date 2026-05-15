@@ -42,9 +42,12 @@ namespace PuntoVentaInventario.Models.Entities
         public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
         public DateTime? FechaModificacion { get; set; }
         public DateTime? FechaEliminacion { get; set; }
-        public int IdUsuarioCreacion { get; set; }
-        public int? IdUsuarioModificacion { get; set; }
-        public int? IdUsuarioEliminacion { get; set; }
+        [Required, MaxLength(450)]
+        public string IdUsuarioCreacion { get; set; } = string.Empty;
+        [MaxLength(450)]
+        public string? IdUsuarioModificacion { get; set; }
+        [MaxLength(450)]
+        public string? IdUsuarioEliminacion { get; set; }
         public bool Activo { get; set; } = true;
 
         public ICollection<ProductoProveedor> ProductoProveedores { get; set; } = new List<ProductoProveedor>();

@@ -36,7 +36,7 @@ namespace PuntoVentaInventario.Controllers
                 var user = await _userManager.FindByNameAsync(dto.UserName);
 
                 if (user == null || !user.Activo)
-                    return Unauthorized(new { mensaje = "Credenciales inválidas." });
+                    return Unauthorized(new { mensaje = "Usuario desabilitado." });
 
                 var isPasswordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
 
@@ -44,6 +44,7 @@ namespace PuntoVentaInventario.Controllers
                     return Unauthorized(new { mensaje = "Credenciales inválidas." });
 
                 var roles = await _userManager.GetRolesAsync(user);
+                var userClaims = await _userManager.GetClaimsAsync(user);
 
                 var claims = new List<Claim>
                 {
@@ -57,6 +58,11 @@ namespace PuntoVentaInventario.Controllers
                 foreach (var role in roles)
                 {
                     claims.Add(new Claim(ClaimTypes.Role, role));
+                }
+
+                foreach (var userClaim in userClaims)
+                {
+                    claims.Add(userClaim);
                 }
 
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));

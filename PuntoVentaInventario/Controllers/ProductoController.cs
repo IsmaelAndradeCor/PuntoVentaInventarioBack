@@ -6,6 +6,7 @@ using PuntoVentaInventario.Data;
 using PuntoVentaInventario.Models.Dtos.Responses;
 using PuntoVentaInventario.Models.Entities;
 using System.Data;
+using System.Security.Claims;
 
 namespace PuntoVentaInventario.Controllers
 {
@@ -342,6 +343,11 @@ namespace PuntoVentaInventario.Controllers
                 ModelState.AddModelError(nameof(dto.Codigo), "El código ya existe.");
             }
 
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userIdClaim))
+                return Unauthorized("No se pudo obtener el usuario autenticado.");
+
             var producto = new Producto
             {
                 Codigo = dto.Codigo,
@@ -355,7 +361,7 @@ namespace PuntoVentaInventario.Controllers
                 IdMarca = dto.IdMarca,
                 IdUnidadMedida = dto.IdUnidadMedida,
                 FechaCreacion = DateTime.UtcNow,
-                IdUsuarioCreacion = 1,
+                IdUsuarioCreacion = userIdClaim,
                 Activo = true
             };
 
@@ -422,6 +428,11 @@ namespace PuntoVentaInventario.Controllers
             if (producto == null)
                 return NotFound(new { mensaje = "Producto no encontrado" });
 
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userIdClaim))
+                return Unauthorized("No se pudo obtener el usuario autenticado.");
+
             producto.Nombre = dto.Nombre;
             producto.Descripcion = dto.Descripcion;
             producto.Costo = dto.Costo;
@@ -432,7 +443,7 @@ namespace PuntoVentaInventario.Controllers
             producto.IdMarca = dto.IdMarca;
             producto.IdUnidadMedida = dto.IdUnidadMedida;
             producto.FechaModificacion = DateTime.UtcNow;
-            producto.IdUsuarioModificacion = 1;
+            producto.IdUsuarioModificacion = userIdClaim;
 
             var proveedoresNuevos = dto.IdsProveedores?.Distinct().ToHashSet() ?? new HashSet<int>();
 
@@ -472,10 +483,15 @@ namespace PuntoVentaInventario.Controllers
             if (producto == null)
                 return NotFound("Producto no encontrado");
 
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userIdClaim))
+                return Unauthorized("No se pudo obtener el usuario autenticado.");
+
             // Soft delete: solo marca como inactivo
             producto.Activo = false;
             producto.FechaEliminacion = DateTime.UtcNow;
-            producto.IdUsuarioEliminacion = 1;  // Usuario logueado
+            producto.IdUsuarioEliminacion = userIdClaim;  // Usuario logueado
 
             await _context.SaveChangesAsync();
             return NoContent();  // 204 Success

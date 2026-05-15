@@ -7,7 +7,7 @@ using PuntoVentaInventario.Models.Entities;
 namespace PuntoVentaInventario.Controllers
 {
     [ApiController]
-    [Route("api/controller")]
+    [Route("api/[controller]")]
     [Authorize(Roles = "Administrador")]
     public class UsuariosController : ControllerBase
     {
@@ -32,7 +32,7 @@ namespace PuntoVentaInventario.Controllers
                     return BadRequest(new { mensaje = "Solo puede crear usuarios con el Rol de Empleado." });
                 }
 
-                var usuarioExistente = await _userManager.FindByNameAsync(dto.UserName);
+                var usuarioExistente = await _userManager.FindByNameAsync(dto.UserName.Trim());
                 if (usuarioExistente != null)
                 {
                     return BadRequest(new { mensaje = "El nombre de usuario ya existe." });
@@ -91,5 +91,79 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [HttpPut("activar/{userName}")]
+        public async Task<IActionResult> ActivarUsuario(string userName)
+        {
+            try
+            {
+                var user = await _userManager.FindByNameAsync(userName.Trim());
+
+                if (user == null)
+                    return NotFound(new { mensaje = "Usuario no encontrado." });
+
+                user.Activo = true;
+
+                var result = await _userManager.UpdateAsync(user);
+
+                if (!result.Succeeded)
+                {
+                    return BadRequest(new
+                    {
+                        mensaje = "No se pudo activar el usuario.",
+                        errores = result.Errors.Select(e => e.Description)
+                    });
+                }
+
+                return Ok(new
+                {
+                    mensaje = "Usuario activado correctamente.",
+                    userName = user.UserName,
+                    activo = user.Activo
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensaje = $"Error al activar usuario: {ex.Message}" });
+            }
+        }
+
+        [HttpPut("desactivar/{userName}")]
+        public async Task<IActionResult> DesactivarUsuario(string userName)
+        {
+            try
+            {
+                var user = await _userManager.FindByNameAsync(userName.Trim());
+
+                if (user == null)
+                    return NotFound(new { mensaje = "Usuario no encontrado." });
+
+                if (user.UserName == "admin")
+                    return BadRequest(new { mensaje = "No se puede desactivar el usuario administrador principal." });
+
+                user.Activo = false;
+
+                var result = await _userManager.UpdateAsync(user);
+
+                if (!result.Succeeded)
+                {
+                    return BadRequest(new
+                    {
+                        mensaje = "No se pudo desactivar el usuario.",
+                        errores = result.Errors.Select(e => e.Description)
+                    });
+                }
+
+                return Ok(new
+                {
+                    mensaje = "Usuario desactivado correctamente.",
+                    userName = user.UserName,
+                    activo = user.Activo
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensaje = $"Error al desactivar usuario: {ex.Message}" });
+            }
+        }
     }
 }

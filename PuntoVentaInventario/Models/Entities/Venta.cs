@@ -21,8 +21,8 @@ namespace PuntoVentaInventario.Models.Entities
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal Total { get; set; }
-
-        public int IdUsuario { get; set; }
+        [Required, MaxLength(450)]
+        public string IdUsuario { get; set; } = string.Empty;
 
         [Required, MaxLength(20)]
         public string FormaPago { get; set; } = "Efectivo";

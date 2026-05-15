@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using PuntoVentaInventario.Data;
 using PuntoVentaInventario.Models;
 using System.Data;
+using System.Security.Claims;
 
 namespace PuntoVentaInventario.Controllers
 {
@@ -50,6 +51,11 @@ namespace PuntoVentaInventario.Controllers
             if (string.IsNullOrWhiteSpace(request.Detalle))
                 return BadRequest("El detalle XML es obligatorio.");
 
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userIdClaim))
+                return Unauthorized("No se pudo obtener el usuario autenticado.");
+
             try
             {
                 var connection = _context.Database.GetDbConnection();
@@ -66,9 +72,9 @@ namespace PuntoVentaInventario.Controllers
                     Value = request.Folio
                 });
 
-                command.Parameters.Add(new SqlParameter("@IdUsuario", SqlDbType.Int)
+                command.Parameters.Add(new SqlParameter("@IdUsuario", SqlDbType.NVarChar, 450)
                 {
-                    Value = request.IdUsuario
+                    Value = userIdClaim
                 });
 
                 command.Parameters.Add(new SqlParameter("@Total", SqlDbType.Decimal)

@@ -1,11 +1,12 @@
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PuntoVentaInventario.Authorization;
 using PuntoVentaInventario.Data;
 using PuntoVentaInventario.Models.Entities;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,7 +52,16 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    foreach (var permission in Permissions.All)
+    {
+        options.AddPolicy(permission, policy =>
+            policy.RequireAssertion(context =>
+                context.User.IsInRole("Administrador") ||
+                context.User.HasClaim("permission", permission)));
+    }
+});
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
