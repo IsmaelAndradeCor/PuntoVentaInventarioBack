@@ -23,8 +23,8 @@ namespace PuntoVentaInventario.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Producto>()
-                .HasQueryFilter(p => p.Activo && p.FechaEliminacion == null);
+            //modelBuilder.Entity<Producto>()
+            //    .HasQueryFilter(p => p.Activo && p.FechaEliminacion == null);
 
             modelBuilder.Entity<Producto>()
                 .HasIndex(p => p.Codigo)

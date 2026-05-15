@@ -36,7 +36,7 @@ namespace PuntoVentaInventario.Controllers
                 var user = await _userManager.FindByNameAsync(dto.UserName);
 
                 if (user == null || !user.Activo)
-                    return Unauthorized(new { mensaje = "Usuario desabilitado." });
+                    return Unauthorized(new { mensaje = "Credenciales inválidas." });
 
                 var isPasswordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
 

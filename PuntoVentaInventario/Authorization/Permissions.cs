@@ -15,10 +15,16 @@
 
         public static class Productos
         {
-            public const string Ver = "productos.ver";
+            public const string Ver = "productos.ver"; // acceso al módulo / menú
+
+            public const string ActivosVer = "productos.activos.ver";
+            public const string InactivosVer = "productos.inactivos.ver";
+
             public const string Crear = "productos.crear";
             public const string Actualizar = "productos.actualizar";
-            public const string Eliminar = "productos.eliminar";
+
+            public const string Activar = "productos.activar";
+            public const string Desactivar = "productos.desactivar";
         }
 
         public static class Marcas
@@ -61,9 +67,12 @@
             Ventas.HistorialVer,
 
             Productos.Ver,
+            Productos.ActivosVer,
+            Productos.InactivosVer,
             Productos.Crear,
             Productos.Actualizar,
-            Productos.Eliminar,
+            Productos.Activar,
+            Productos.Desactivar,
 
             Marcas.Ver,
             Marcas.Crear,

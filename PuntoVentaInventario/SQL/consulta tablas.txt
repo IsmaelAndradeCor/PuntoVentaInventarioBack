@@ -9,3 +9,50 @@ SELECT * FROM Categorias
 SELECT * FROM UnidadesMedida
 
 
+select * from AspNetUsers
+
+DECLARE @UserId NVARCHAR(450) = 'd08e4163-d20e-4cbb-b9c5-55579533ca7b';
+
+INSERT INTO AspNetUserClaims (UserId, ClaimType, ClaimValue)
+SELECT @UserId, 'permission', P.ClaimValue
+FROM (VALUES
+    ('categorias.actualizar'),
+    ('categorias.crear'),
+    ('categorias.eliminar'),
+    ('categorias.ver'),
+    ('home.ver'),
+    ('marcas.actualizar'),
+    ('marcas.crear'),
+    ('marcas.eliminar'),
+    ('marcas.ver'),
+    ('productos.actualizar'),
+    ('productos.crear'),
+    ('productos.eliminar'),
+    ('productos.ver'),
+    ('productos.inactivos.ver'),
+    ('productos.activos.ver'),
+    ('productos.activar'),
+    ('productos.desactivar'),
+    ('proveedores.actualizar'),
+    ('proveedores.crear'),
+    ('proveedores.eliminar'),
+    ('proveedores.ver'),
+    ('unidadesmedida.actualizar'),
+    ('unidadesmedida.crear'),
+    ('unidadesmedida.eliminar'),
+    ('unidadesmedida.ver'),
+    ('ventas.historial.ver'),
+    ('ventas.realizar')
+) AS P(ClaimValue)
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM AspNetUserClaims UC
+    WHERE UC.UserId = @UserId
+      AND UC.ClaimType = 'permission'
+      AND UC.ClaimValue = P.ClaimValue
+);
+
+
+select * from AspNetUserClaims
+
+select * from AspNetRoles

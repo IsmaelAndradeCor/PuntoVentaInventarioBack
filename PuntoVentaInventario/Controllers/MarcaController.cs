@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PuntoVentaInventario.Authorization;
 using PuntoVentaInventario.Data;
 using PuntoVentaInventario.Models;
 using PuntoVentaInventario.Models.Dtos.Requests;
@@ -19,6 +21,7 @@ namespace PuntoVentaInventario.Controllers
             _context = context;
         }
 
+        [Authorize(Policy = Permissions.Marcas.Ver)]
         [HttpGet("listar_marcas")]
         public async Task<IActionResult> GetMarcas()
         {
@@ -42,6 +45,7 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Marcas.Ver)]
         [HttpGet("obtener_marca/{id:int}")]
         public async Task<IActionResult> GetMarcaPorId(int id)
         {
@@ -68,6 +72,7 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Marcas.Crear)]
         [HttpPost("crear_marca")]
         public async Task<IActionResult> CrearMarca([FromBody] MarcaUpsertDto dto)
         {
@@ -107,6 +112,7 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Marcas.Actualizar)]
         [HttpPut("actualizar_marca/{id:int}")]
         public async Task<ActionResult<MarcaResponseDto>> ActualizarMarca(int id, [FromBody] MarcaUpsertDto dto)
         {
@@ -147,6 +153,7 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Marcas.Eliminar)]
         [HttpDelete("eliminar_marca/{id:int}")]
         public async Task<IActionResult> EliminarMarca(int id)
         {
