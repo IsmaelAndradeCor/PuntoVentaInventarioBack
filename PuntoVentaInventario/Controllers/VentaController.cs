@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using PuntoVentaInventario.Authorization;
 using PuntoVentaInventario.Data;
-using PuntoVentaInventario.Models;
+using PuntoVentaInventario.Models.Dtos.Requests;
 using System.Data;
 using System.Security.Claims;
 
@@ -19,6 +21,7 @@ namespace PuntoVentaInventario.Controllers
             _context = context;
         }
 
+        [Authorize(Policy = Permissions.Ventas.HistorialVer)]
         [HttpGet("generar_ventas")]
         public async Task<IActionResult> GetGenerarVentas()
         {
@@ -36,8 +39,9 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Ventas.Realizar)]
         [HttpPost("realizar_venta")]
-        public async Task<ActionResult<int>> RegistrarVenta([FromBody] RegistrarVentaDto request)
+        public async Task<ActionResult<int>> RegistrarVenta([FromBody] RegistrarVentaUpsertDto request)
         {
             if (request == null)
                 return BadRequest("Datos no válidos.");
@@ -93,6 +97,13 @@ namespace PuntoVentaInventario.Controllers
                 int idVenta = Convert.ToInt32(result);
 
                 return Ok(idVenta);
+            }
+            catch (SqlException ex) when (ex.Number == 50001 || ex.Number == 50002)
+            {
+                return Conflict(new
+                {
+                    mensaje = ex.Message
+                });
             }
             catch (Exception ex)
             {

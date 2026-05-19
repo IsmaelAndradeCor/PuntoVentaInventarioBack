@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PuntoVentaInventario.Authorization;
 using PuntoVentaInventario.Data;
 using PuntoVentaInventario.Models;
 using PuntoVentaInventario.Models.Dtos.Requests;
@@ -18,9 +20,9 @@ namespace PuntoVentaInventario.Controllers
         {
             _context = context;
         }
-
-        [HttpGet("listar_categorias")]
-        public async Task<IActionResult> GetCategorias()
+        [Authorize(Policy = Permissions.Categorias.ActivosVer)]
+        [HttpGet("listar_categorias_activas")]
+        public async Task<IActionResult> GetCategoriasActivas()
         {
             try
             {
@@ -42,6 +44,31 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Categorias.InactivosVer)]
+        [HttpGet("listar_categorias_inactivas")]
+        public async Task<IActionResult> GetCategoriasInactivas()
+        {
+            try
+            {
+                var categorias = await _context.Categorias
+                    .Where(m => !m.Activo)
+                    .OrderBy(m => m.Nombre)
+                    .Select(m => new CategoriaResponseDto
+                    {
+                        Id = m.Id,
+                        Nombre = m.Nombre
+                    })
+                    .ToListAsync();
+
+                return Ok(categorias);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al obtener categorias: {ex.Message}");
+            }
+        }
+
+        [Authorize(Policy = Permissions.Categorias.Ver)]
         [HttpGet("obtener_categoria/{id:int}")]
         public async Task<IActionResult> GetCategorisPorId(int id)
         {
@@ -68,6 +95,7 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Categorias.Crear)]
         [HttpPost("crear_categoria")]
         public async Task<IActionResult> CrearCategoria([FromBody] CategoriaUpsertDto dto)
         {
@@ -107,6 +135,7 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Categorias.Actualizar)]
         [HttpPut("actualizar_categoria/{id:int}")]
         public async Task<ActionResult<CategoriaResponseDto>> ActualizarCategoria(int id, [FromBody] CategoriaUpsertDto dto)
         {
@@ -147,8 +176,33 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
-        [HttpDelete("eliminar_categoria/{id:int}")]
-        public async Task<IActionResult> EliminarCategoria(int id)
+        [Authorize(Policy = Permissions.Categorias.Activar)]
+        [HttpPut("activar_categoria/{id:int}")]
+        public async Task<IActionResult> ActivarCategoria(int id)
+        {
+            try
+            {
+                var categoria = await _context.Categorias
+                    .FirstOrDefaultAsync(m => m.Id == id && !m.Activo);
+
+                if (categoria == null)
+                    return NotFound(new { mensaje = "Categoria no encontrada" });
+
+                categoria.Activo = true;
+
+                await _context.SaveChangesAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al eliminar la categoria: {ex.Message}");
+            }
+        }
+
+        [Authorize(Policy = Permissions.Categorias.Desactivar)]
+        [HttpDelete("desactivar_categoria/{id:int}")]
+        public async Task<IActionResult> DesactivarCategoria(int id)
         {
             try
             {

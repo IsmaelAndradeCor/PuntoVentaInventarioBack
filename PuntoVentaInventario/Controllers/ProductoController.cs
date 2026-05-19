@@ -81,7 +81,65 @@ namespace PuntoVentaInventario.Controllers
                 return StatusCode(500, $"Error al obtener productos: {ex.Message}");
             }
         }
-        
+
+        // Obtiene una lista sencilla de los productos con stock para realizar la venta, el permiso es con ventas.realizar
+        [Authorize(Policy = Permissions.Ventas.Realizar)]
+        [HttpGet("listar_productos_venta")]
+        public async Task<IActionResult> GetProductosVenta()
+        {
+            try
+            {
+                var productos = await _context.Productos
+                    .Where(m => m.Activo && m.Stock > 0)
+                    .OrderBy(m => m.Nombre)
+                    .Select(m => new ProductoSimpleResponseDto
+                    {
+                        Id = m.Id,
+                        Codigo = m.Codigo,
+                        Nombre = m.Nombre,
+                        //Descripcion = m.Descripcion,
+                        Costo = m.Costo,
+                        Precio = m.Precio,
+                        Stock = m.Stock,
+                        //StockMinimo = m.StockMinimo,
+                        //Categoria = m.Categoria == null ? null : new CategoriaResponseDto
+                        //{
+                        //    Id = m.Categoria.Id,
+                        //    Nombre = m.Categoria.Nombre
+                        //},
+                        //Marca = m.Marca == null ? null : new MarcaResponseDto
+                        //{
+                        //    Id = m.Marca.Id,
+                        //    Nombre = m.Marca.Nombre
+                        //},
+                        UnidadMedida = m.UnidadMedida == null ? null : new UnidadMedidaResponseDto
+                        {
+                            Id = m.UnidadMedida.Id,
+                            Nombre = m.UnidadMedida.Nombre,
+                            Clave = m.UnidadMedida.Clave,
+                            PermiteDecimales = m.UnidadMedida.PermiteDecimales
+                        }
+                        //Proveedores = m.ProductoProveedores
+                        //.Select(pp => new ProveedorResponseDto
+                        //{
+                        //    Id = pp.Proveedor.Id,
+                        //    Nombre = pp.Proveedor.Nombre,
+                        //    Contacto = pp.Proveedor.Contacto,
+                        //    Telefono = pp.Proveedor.Telefono,
+                        //    Correo = pp.Proveedor.Correo
+                        //})
+                        //.ToList()
+                    })
+                    .ToListAsync();
+
+                return Ok(productos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al obtener productos: {ex.Message}");
+            }
+        }
+
         // Obtiene todos los productos inactivos
         [Authorize(Policy = Permissions.Productos.InactivosVer)]
         [HttpGet("listar_productos_inactivos")]
@@ -280,7 +338,10 @@ namespace PuntoVentaInventario.Controllers
 
             if (await _context.Productos.AnyAsync(p => p.Codigo == dto.Codigo))
             {
-                ModelState.AddModelError(nameof(dto.Codigo), "El código ya existe.");
+                return BadRequest(new
+                {
+                    mensaje = "Ya existe un producto con ese código."
+                });
             }
 
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);

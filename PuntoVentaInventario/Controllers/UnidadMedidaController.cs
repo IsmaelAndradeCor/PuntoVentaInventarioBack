@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PuntoVentaInventario.Authorization;
 using PuntoVentaInventario.Data;
 using PuntoVentaInventario.Models.Dtos.Requests;
 using PuntoVentaInventario.Models.Dtos.Responses;
@@ -19,8 +21,9 @@ namespace PuntoVentaInventario.Controllers
             _context = context;
         }
 
-        [HttpGet("listar_unidades_medida")]
-        public async Task<IActionResult> GetUnidadesMedida()
+        [Authorize(Policy = Permissions.UnidadesMedida.ActivosVer)]
+        [HttpGet("listar_unidades_medida_activas")]
+        public async Task<IActionResult> GetUnidadesMedidaActivas()
         {
             try
             {
@@ -43,6 +46,32 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.UnidadesMedida.InactivosVer)]
+        [HttpGet("listar_unidades_medida_inactivas")]
+        public async Task<IActionResult> GetUnidadesMedidaInactivas()
+        {
+            try
+            {
+                var unidadesMedida = await _context.UnidadesMedida
+                    .Where(p => !p.Activo)
+                    .OrderBy(p => p.Nombre)
+                    .Select(p => new UnidadMedidaResponseDto
+                    {
+                        Id = p.Id,
+                        Nombre = p.Nombre,
+                        Clave = p.Clave,
+                        PermiteDecimales = p.PermiteDecimales
+                    })
+                    .ToListAsync();
+                return Ok(unidadesMedida);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al obtener las unidades de medida: {ex.Message}");
+            }
+        }
+
+        [Authorize(Policy = Permissions.UnidadesMedida.Ver)]
         [HttpGet("obtener_unidad_medida/{id:int}")]
         public async Task<IActionResult> GetUnidadMedidaPorId(int id)
         {
@@ -71,6 +100,7 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.UnidadesMedida.Crear)]
         [HttpPost("crear_unidad_medida")]
         public async Task<IActionResult> CrearUnidadMedida([FromBody] UnidadMedidaUpsertDto dto)
         {
@@ -114,6 +144,7 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.UnidadesMedida.Actualizar)]
         [HttpPut("actualizar_unidad_medida/{idUnidadMedida:int}")]
         public async Task<ActionResult<UnidadMedidaResponseDto>> ActualizarUnidadMedida(int idUnidadMedida, [FromBody] UnidadMedidaUpsertDto dto)
         {
@@ -158,8 +189,33 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
-        [HttpDelete("eliminar_unidad_medida/{idUnidadMedida:int}")]
-        public async Task<IActionResult> EliminarUnidadMedida(int idUnidadMedida)
+        [Authorize(Policy = Permissions.UnidadesMedida.Activar)]
+        [HttpPut("activar_unidad_medida/{idUnidadMedida:int}")]
+        public async Task<IActionResult> ActivarUnidadMedida(int idUnidadMedida)
+        {
+            try
+            {
+                var unidadMedida = await _context.UnidadesMedida
+                    .FirstOrDefaultAsync(m => m.Id == idUnidadMedida && !m.Activo);
+
+                if (unidadMedida == null)
+                    return NotFound(new { mensaje = "Unidad de Medida no encontrada" });
+
+                unidadMedida.Activo = true;
+
+                await _context.SaveChangesAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al eliminar la Unidad de Medida: {ex.Message}");
+            }
+        }
+
+        [Authorize(Policy = Permissions.UnidadesMedida.Desactivar)]
+        [HttpDelete("desactivar_unidad_medida/{idUnidadMedida:int}")]
+        public async Task<IActionResult> DesactivarUnidadMedida(int idUnidadMedida)
         {
             try
             {

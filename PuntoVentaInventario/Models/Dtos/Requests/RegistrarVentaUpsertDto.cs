@@ -1,6 +1,6 @@
-﻿namespace PuntoVentaInventario.Models
+﻿namespace PuntoVentaInventario.Models.Dtos.Requests
 {
-    public class RegistrarVentaDto
+    public class RegistrarVentaUpsertDto
     {
         public string Folio { get; set; } = string.Empty;
         public decimal Total { get; set; }

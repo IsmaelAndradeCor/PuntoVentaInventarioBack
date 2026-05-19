@@ -21,14 +21,38 @@ namespace PuntoVentaInventario.Controllers
             _context = context;
         }
 
-        [Authorize(Policy = Permissions.Marcas.Ver)]
-        [HttpGet("listar_marcas")]
-        public async Task<IActionResult> GetMarcas()
+        [Authorize(Policy = Permissions.Marcas.ActivosVer)]
+        [HttpGet("listar_marcas_activas")]
+        public async Task<IActionResult> GetMarcasActivos()
         {
             try
             {
                 var marcas = await _context.Marcas
                     .Where(m => m.Activo)
+                    .OrderBy(m => m.Nombre)
+                    .Select(m => new MarcaResponseDto
+                    {
+                        Id = m.Id,
+                        Nombre = m.Nombre
+                    })
+                    .ToListAsync();
+
+                return Ok(marcas);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al obtener marcas: {ex.Message}");
+            }
+        }
+
+        [Authorize(Policy = Permissions.Marcas.InactivosVer)]
+        [HttpGet("listar_marcas_inactivas")]
+        public async Task<IActionResult> GetMarcasInactivos()
+        {
+            try
+            {
+                var marcas = await _context.Marcas
+                    .Where(m => !m.Activo)
                     .OrderBy(m => m.Nombre)
                     .Select(m => new MarcaResponseDto
                     {
@@ -153,7 +177,30 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
-        [Authorize(Policy = Permissions.Marcas.Eliminar)]
+        [Authorize(Policy = Permissions.Marcas.Desactivar)]
+        [HttpPut("activar_marca/{id:int}")]
+        public async Task<IActionResult> ActivarMarca(int id)
+        {
+            try
+            {
+                var marca = await _context.Marcas
+                    .FirstOrDefaultAsync(m => m.Id == id && !m.Activo);
+
+                if (marca == null)
+                    return NotFound(new { mensaje = "Marca no encontrada" });
+
+                marca.Activo = true;
+
+                await _context.SaveChangesAsync();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al eliminar la marca: {ex.Message}");
+            }
+        }
+
+        [Authorize(Policy = Permissions.Marcas.Desactivar)]
         [HttpDelete("eliminar_marca/{id:int}")]
         public async Task<IActionResult> EliminarMarca(int id)
         {

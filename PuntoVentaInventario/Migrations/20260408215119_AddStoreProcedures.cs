@@ -44,9 +44,40 @@ namespace PuntoVentaInventario.Migrations
             AS
             BEGIN
                 SET NOCOUNT ON;
+                SET XACT_ABORT ON;
 
                 BEGIN TRY
                     BEGIN TRANSACTION;
+
+                    DECLARE @Items TABLE
+                    (
+                        IdProducto INT,
+                        Codigo NVARCHAR(50),
+                        Nombre NVARCHAR(100),
+                        Cantidad DECIMAL(18,2),
+                        Costo DECIMAL(18,2),
+                        Precio DECIMAL(18,2)
+                    );
+
+                    INSERT INTO @Items (IdProducto, Codigo, Nombre, Cantidad, Costo, Precio)
+                    SELECT
+                        t.c.value('(IdProducto)[1]', 'INT'),
+                        t.c.value('(Codigo)[1]', 'NVARCHAR(50)'),
+                        t.c.value('(Nombre)[1]', 'NVARCHAR(100)'),
+                        t.c.value('(Cantidad)[1]', 'DECIMAL(18,2)'),
+                        t.c.value('(Costo)[1]', 'DECIMAL(18,2)'),
+                        t.c.value('(Precio)[1]', 'DECIMAL(18,2)')
+                    FROM @Detalle.nodes('/Items/Item') t(c);
+
+                    IF EXISTS (
+                        SELECT 1
+                        FROM @Items i
+                        INNER JOIN Productos p ON p.Id = i.IdProducto
+                        WHERE p.Stock < i.Cantidad
+                    )
+                    BEGIN
+                        ;THROW 50001, 'Inventario insuficiente para uno o más productos.', 1;
+                    END
 
                     INSERT INTO Ventas (Folio, FechaVenta, Subtotal, Descuento, Total, IdUsuario, FormaPago)
                     VALUES (@Folio, GETDATE(), @Total, 0, @Total, @IdUsuario, 'Efectivo');
@@ -67,29 +98,36 @@ namespace PuntoVentaInventario.Migrations
                     )
                     SELECT
                         @IdVenta,
-                        t.c.value('(IdProducto)[1]', 'INT'),
-                        t.c.value('(Codigo)[1]', 'NVARCHAR(50)'),
-                        t.c.value('(Nombre)[1]', 'NVARCHAR(100)'),
-                        t.c.value('(Cantidad)[1]', 'DECIMAL(18,2)'),
-                        t.c.value('(Costo)[1]', 'DECIMAL(18,2)'),
-                        t.c.value('(Cantidad)[1]', 'DECIMAL(18,2)') * t.c.value('(Costo)[1]', 'DECIMAL(18,2)'),
-                        t.c.value('(Precio)[1]', 'DECIMAL(18,2)'),
-                        t.c.value('(Cantidad)[1]', 'DECIMAL(18,2)') * t.c.value('(Precio)[1]', 'DECIMAL(18,2)')
-                    FROM @Detalle.nodes('/Items/Item') t(c);
+                        i.IdProducto,
+                        i.Codigo,
+                        i.Nombre,
+                        i.Cantidad,
+                        i.Costo,
+                        i.Cantidad * i.Costo,
+                        i.Precio,
+                        i.Cantidad * i.Precio
+                    FROM @Items i;
 
                     UPDATE p
-                    SET p.Stock = p.Stock - d.Cantidad
+                    SET p.Stock = p.Stock - i.Cantidad
                     FROM Productos p
-                    INNER JOIN DetalleVentas d ON p.Id = d.IdProducto
-                    WHERE d.IdVenta = @IdVenta;
+                    INNER JOIN @Items i ON p.Id = i.IdProducto
+                    WHERE p.Stock >= i.Cantidad;
+
+                    IF @@ROWCOUNT <> (SELECT COUNT(*) FROM @Items)
+                    BEGIN
+                        ;THROW 50002, 'No se pudo actualizar el inventario de todos los productos.', 1;
+                    END
 
                     COMMIT TRANSACTION;
 
                     SELECT @IdVenta AS IdVenta;
                 END TRY
                 BEGIN CATCH
-                    ROLLBACK TRANSACTION;
-                    THROW;
+                    IF @@TRANCOUNT > 0
+                        ROLLBACK TRANSACTION;
+
+                    ;THROW;
                 END CATCH
             END
             ", suppressTransaction: true);

@@ -3,6 +3,7 @@
 public class ProductoUpsertDto
 {
         [Required(ErrorMessage = "El Código es obligatorio.")]
+    [StringLength(20, ErrorMessage = "Máximo 20 caracteres para el Código.")]
     public string Codigo { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "El Nombre es obligatorio.")]

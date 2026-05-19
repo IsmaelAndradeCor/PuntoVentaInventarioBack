@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PuntoVentaInventario.Authorization;
 using PuntoVentaInventario.Data;
 using PuntoVentaInventario.Models.Dtos.Requests;
 using PuntoVentaInventario.Models.Dtos.Responses;
@@ -18,8 +20,9 @@ namespace PuntoVentaInventario.Controllers
          _context = context;
         }
 
-        [HttpGet("listar_proveedores")]
-        public async Task<IActionResult> GetProveedores() {
+        [Authorize(Policy = Permissions.Proveedores.ActivosVer)]
+        [HttpGet("listar_proveedores_activos")]
+        public async Task<IActionResult> GetProveedoresActivos() {
             try
             {
                 var proveedores = await _context.Proveedores
@@ -42,6 +45,33 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Proveedores.InactivosVer)]
+        [HttpGet("listar_proveedores_inactivos")]
+        public async Task<IActionResult> GetProveedoresInactivos()
+        {
+            try
+            {
+                var proveedores = await _context.Proveedores
+                    .Where(p => !p.Activo)
+                    .OrderBy(p => p.Nombre)
+                    .Select(p => new ProveedorResponseDto
+                    {
+                        Id = p.Id,
+                        Nombre = p.Nombre,
+                        Contacto = p.Contacto,
+                        Telefono = p.Telefono,
+                        Correo = p.Correo
+                    })
+                    .ToListAsync();
+                return Ok(proveedores);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al obtener proveedores: {ex.Message}");
+            }
+        }
+
+        [Authorize(Policy = Permissions.Proveedores.Ver)]
         [HttpGet("obtener_proveedor/{id:int}")]
         public async Task<IActionResult> GetProveedorPorId(int id)
         {
@@ -68,6 +98,7 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Proveedores.Crear)]
         [HttpPost("crear_proveedor")]
         public async Task<IActionResult> CrearProveedor([FromBody] ProveedorUpsertDto dto)
         {
@@ -113,6 +144,7 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Proveedores.Actualizar)]
         [HttpPut("actualizar_proveedor/{idProveedor:int}")]
         public async Task<ActionResult<ProveedorResponseDto>> ActualizarProveedor(int idProveedor, [FromBody] ProveedorUpsertDto dto)
         {
@@ -159,8 +191,33 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
-        [HttpDelete("eliminar_proveedor/{idProveedor:int}")]
-        public async Task<IActionResult> EliminarProveedor(int idProveedor)
+        [Authorize(Policy = Permissions.Proveedores.Activar)]
+        [HttpPut("activar_proveedor/{idProveedor:int}")]
+        public async Task<IActionResult> ActivarProveedor(int idProveedor)
+        {
+            try
+            {
+                var proveedor = await _context.Proveedores
+                    .FirstOrDefaultAsync(m => m.Id == idProveedor && m.Activo);
+
+                if (proveedor == null)
+                    return NotFound(new { mensaje = "Proveedor no encontrado" });
+
+                proveedor.Activo = true;
+
+                await _context.SaveChangesAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al eliminar al Proveedor: {ex.Message}");
+            }
+        }
+
+        [Authorize(Policy = Permissions.Proveedores.Desactivar)]
+        [HttpDelete("desactivar_proveedor/{idProveedor:int}")]
+        public async Task<IActionResult> DesactivarProveedor(int idProveedor)
         {
             try
             {

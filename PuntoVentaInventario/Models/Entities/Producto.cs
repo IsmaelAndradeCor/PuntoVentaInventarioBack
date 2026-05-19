@@ -9,7 +9,7 @@ namespace PuntoVentaInventario.Models.Entities
         [Key]
         public int Id { get; set; }
 
-        [Required, MaxLength(20)]
+        [Required, MaxLength(128)]
         public string Codigo { get; set; } = string.Empty;
 
         [Required, MaxLength(100)]
