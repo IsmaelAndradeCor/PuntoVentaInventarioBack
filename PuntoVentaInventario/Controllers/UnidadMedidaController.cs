@@ -111,10 +111,10 @@ namespace PuntoVentaInventario.Controllers
                     return BadRequest(new { mensaje = "El nombre de la unidad de medida es obligatorio" });
 
                 var existe = await _context.UnidadesMedida
-                    .AnyAsync(p => p.Activo && p.Nombre.ToLower() == nombreNormalizado.ToLower());
+                    .AnyAsync(p => p.Nombre.ToLower() == nombreNormalizado.ToLower());
                 if (existe)
                 {
-                    return BadRequest(new { mensaje = "Ya existe una unidad de medida con ese nombre" });
+                    return BadRequest(new { mensaje = "Ya existe una unidad de medida con ese nombre, por favor revisa que no esté inactivo" });
                 }
 
                 var unidadMedida = new UnidadMedida

@@ -108,10 +108,10 @@ namespace PuntoVentaInventario.Controllers
                     return BadRequest(new { mensaje = "El nombre de la marca es obligatorio" });
 
                 var existe = await _context.Marcas
-                    .AnyAsync(m => m.Activo && m.Nombre.ToLower() == nombreNormalizado.ToLower());
+                    .AnyAsync(m => m.Nombre.ToLower() == nombreNormalizado.ToLower());
 
                 if (existe)
-                    return BadRequest(new { mensaje = "Ya existe una marca con ese nombre" });
+                    return BadRequest(new { mensaje = "Ya existe una marca con ese nombre, por favor revisa que no este inactiva" });
 
                 var marca = new Marca
                 {
@@ -184,10 +184,13 @@ namespace PuntoVentaInventario.Controllers
             try
             {
                 var marca = await _context.Marcas
-                    .FirstOrDefaultAsync(m => m.Id == id && !m.Activo);
+                    .FirstOrDefaultAsync(m => m.Id == id);
 
                 if (marca == null)
                     return NotFound(new { mensaje = "Marca no encontrada" });
+
+                if (marca.Activo == true)
+                    return NotFound(new { mensaje = "Marca ya activa" });
 
                 marca.Activo = true;
 
@@ -201,22 +204,25 @@ namespace PuntoVentaInventario.Controllers
         }
 
         [Authorize(Policy = Permissions.Marcas.Desactivar)]
-        [HttpDelete("eliminar_marca/{id:int}")]
-        public async Task<IActionResult> EliminarMarca(int id)
+        [HttpDelete("desactivar_marca/{id:int}")]
+        public async Task<IActionResult> DesactivarMarca(int id)
         {
             try
             {
                 var marca = await _context.Marcas
-                    .FirstOrDefaultAsync(m => m.Id == id && m.Activo);
+                    .FirstOrDefaultAsync(m => m.Id == id);
 
                 if (marca == null)
                     return NotFound(new { mensaje = "Marca no encontrada" });
+
+                if (marca.Activo == false)
+                    return NotFound(new { mensaje = "Marca ya inactiva" });
 
                 var tieneProductos = await _context.Productos
                     .AnyAsync(p => p.IdMarca == id && p.Activo);
 
                 if (tieneProductos)
-                    return BadRequest(new { mensaje = "No se puede eliminar la marca porque tiene productos asociados" });
+                    return BadRequest(new { mensaje = "No se puede desactivar la marca porque tiene productos asociados" });
 
                 marca.Activo = false;
 
@@ -226,7 +232,7 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al eliminar la marca: {ex.Message}");
+                return StatusCode(500, $"Error al desactivar la marca: {ex.Message}");
             }
         }
     }

@@ -335,8 +335,9 @@ namespace PuntoVentaInventario.Controllers
         [HttpPost("crear_producto")]
         public async Task<IActionResult> InsertarProducto([FromBody] ProductoUpsertDto dto)
         {
+            dto.Codigo = dto.Codigo.Trim();
 
-            if (await _context.Productos.AnyAsync(p => p.Codigo == dto.Codigo))
+            if (await _context.Productos.AnyAsync(p => p.Codigo.Trim() == dto.Codigo))
             {
                 return BadRequest(new
                 {
@@ -393,9 +394,11 @@ namespace PuntoVentaInventario.Controllers
         [HttpPut("actualizar_producto")]
         public async Task<IActionResult> ActualizarProducto([FromBody] ProductoUpsertDto dto)
         {
+            dto.Codigo = dto.Codigo.Trim();
+
             var producto = await _context.Productos
                 .Include(p => p.ProductoProveedores)
-                .FirstOrDefaultAsync(p => p.Codigo == dto.Codigo && p.Activo);
+                .FirstOrDefaultAsync(p => p.Codigo.Trim() == dto.Codigo && p.Activo);
 
             if (producto == null)
                 return NotFound(new { mensaje = "Producto no encontrado" });

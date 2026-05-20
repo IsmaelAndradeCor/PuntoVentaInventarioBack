@@ -1,9 +1,20 @@
-﻿namespace PuntoVentaInventario.Models.Dtos.Requests
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace PuntoVentaInventario.Models.Dtos.Requests
 {
     public class RegistrarVentaUpsertDto
     {
-        public string Folio { get; set; } = string.Empty;
-        public decimal Total { get; set; }
-        public string Detalle { get; set; } = string.Empty;
+        [Required]
+        [MinLength(1)]
+        public List<RegistrarVentaDetalleUpsertDto> Detalles { get; set; } = new();
+    }
+
+    public class RegistrarVentaDetalleUpsertDto
+    {
+        [Range(1, int.MaxValue)]
+        public int IdProducto { get; set; }
+
+        [Range(typeof(decimal), "0.01", "9999999999")]
+        public decimal Cantidad { get; set; }
     }
 }

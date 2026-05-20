@@ -109,10 +109,10 @@ namespace PuntoVentaInventario.Controllers
                     return BadRequest(new { mensaje = "El nombre de del proveedor es obligatorio" });
 
                 var existe = await _context.Proveedores
-                    .AnyAsync(p => p.Activo && p.Nombre.ToLower() == nombreNormalizado.ToLower());
+                    .AnyAsync(p => p.Nombre.ToLower() == nombreNormalizado.ToLower());
                 if (existe)
                 {
-                    return BadRequest(new { mensaje = "Ya existe un proveedor con ese nombre" });
+                    return BadRequest(new { mensaje = "Ya existe un proveedor con ese nombre, por favor revisa que no esté inactivo" });
                 }
 
                 var proveedor = new Proveedor

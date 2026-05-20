@@ -107,10 +107,10 @@ namespace PuntoVentaInventario.Controllers
                     return BadRequest(new { mensaje = "El nombre de la categoria es obligatorio" });
 
                 var existe = await _context.Categorias
-                    .AnyAsync(m => m.Activo && m.Nombre.ToLower() == nombreNormalizado.ToLower());
+                    .AnyAsync(m => m.Nombre.ToLower() == nombreNormalizado.ToLower());
 
                 if (existe)
-                    return BadRequest(new { mensaje = "Ya existe una categoria con ese nombre" });
+                    return BadRequest(new { mensaje = "Ya existe una categoria con ese nombre, por favor revisa que no este inactiva" });
 
                 var categoria = new Categoria
                 {
@@ -183,10 +183,13 @@ namespace PuntoVentaInventario.Controllers
             try
             {
                 var categoria = await _context.Categorias
-                    .FirstOrDefaultAsync(m => m.Id == id && !m.Activo);
+                    .FirstOrDefaultAsync(m => m.Id == id);
 
                 if (categoria == null)
                     return NotFound(new { mensaje = "Categoria no encontrada" });
+
+                if (categoria.Activo == true)
+                    return BadRequest(new { mensaje = "Categoria ya activa" });
 
                 categoria.Activo = true;
 
@@ -196,7 +199,7 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al eliminar la categoria: {ex.Message}");
+                return StatusCode(500, $"Error al activar la categoria: {ex.Message}");
             }
         }
 
@@ -207,16 +210,19 @@ namespace PuntoVentaInventario.Controllers
             try
             {
                 var categoria = await _context.Categorias
-                    .FirstOrDefaultAsync(m => m.Id == id && m.Activo);
+                    .FirstOrDefaultAsync(m => m.Id == id);
 
                 if (categoria == null)
                     return NotFound(new { mensaje = "Categoria no encontrada" });
+
+                if (categoria.Activo == false)
+                    return BadRequest(new { mensaje = "Categoria ya inactiva" });
 
                 var tieneProductos = await _context.Productos
                     .AnyAsync(p => p.IdCategoria == id && p.Activo);
 
                 if (tieneProductos)
-                    return BadRequest(new { mensaje = "No se puede eliminar la categoria porque tiene productos asociados" });
+                    return BadRequest(new { mensaje = "No se puede desactivar la categoria porque tiene productos asociados" });
 
                 categoria.Activo = false;
 
@@ -226,7 +232,7 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al eliminar la categoria: {ex.Message}");
+                return StatusCode(500, $"Error al desactivar la categoria: {ex.Message}");
             }
         }
     }

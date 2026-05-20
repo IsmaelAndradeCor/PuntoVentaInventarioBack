@@ -18,6 +18,7 @@ namespace PuntoVentaInventario.Data
         public DbSet<UnidadMedida> UnidadesMedida { get; set; }
         public DbSet<Proveedor> Proveedores { get; set; }
         public DbSet<ProductoProveedor> ProductoProveedores { get; set; }
+        public DbSet<Folio> Folios { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -107,6 +108,38 @@ namespace PuntoVentaInventario.Data
                 .HasForeignKey(pp => pp.IdProveedor);
 
             modelBuilder.Entity<GenerarVentasDto>().HasNoKey();
+
+            modelBuilder.Entity<Folio>(entity =>
+            {
+                entity.HasKey(f => f.Tipo);
+
+                entity.Property(f => f.Tipo)
+                    .HasMaxLength(20);
+
+                entity.Property(f => f.Fecha)
+                    .HasColumnType("date");
+
+                entity.HasData(
+                    new Folio
+                    {
+                        Tipo = "VENTA",
+                        Fecha = new DateTime(2026, 1, 1),
+                        UltimoNumero = 0
+                    },
+                    new Folio
+                    {
+                        Tipo = "PAGO",
+                        Fecha = new DateTime(2026, 1, 1),
+                        UltimoNumero = 0
+                    },
+                    new Folio
+                    {
+                        Tipo = "MERMA",
+                        Fecha = new DateTime(2026, 1, 1),
+                        UltimoNumero = 0
+                    }
+                );
+            });
         }
     }
 }

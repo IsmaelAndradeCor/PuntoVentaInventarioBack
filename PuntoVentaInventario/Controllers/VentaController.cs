@@ -5,8 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using PuntoVentaInventario.Authorization;
 using PuntoVentaInventario.Data;
 using PuntoVentaInventario.Models.Dtos.Requests;
+using PuntoVentaInventario.Models.Dtos.Responses;
 using System.Data;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace PuntoVentaInventario.Controllers
 {
@@ -39,22 +41,12 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+
+
         [Authorize(Policy = Permissions.Ventas.Realizar)]
         [HttpPost("realizar_venta")]
-        public async Task<ActionResult<int>> RegistrarVenta([FromBody] RegistrarVentaUpsertDto request)
+        public async Task<ActionResult<RegistrarVentaResponseDto>> RegistrarVenta([FromBody] RegistrarVentaUpsertDto request)
         {
-            if (request == null)
-                return BadRequest("Datos no válidos.");
-
-            if (string.IsNullOrWhiteSpace(request.Folio))
-                return BadRequest("El folio es obligatorio.");
-
-            if (request.Total <= 0)
-                return BadRequest("El total debe ser mayor a 0.");
-
-            if (string.IsNullOrWhiteSpace(request.Detalle))
-                return BadRequest("El detalle XML es obligatorio.");
-
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrWhiteSpace(userIdClaim))
@@ -71,34 +63,48 @@ namespace PuntoVentaInventario.Controllers
                 command.CommandText = "sp_RegistrarVenta";
                 command.CommandType = CommandType.StoredProcedure;
 
-                command.Parameters.Add(new SqlParameter("@Folio", SqlDbType.NVarChar, 20)
-                {
-                    Value = request.Folio
-                });
+                var detalleJson = JsonSerializer.Serialize(
+                    request.Detalles.Select(d => new
+                    {
+                        idProducto = d.IdProducto,
+                        cantidad = d.Cantidad
+                    }));
 
                 command.Parameters.Add(new SqlParameter("@IdUsuario", SqlDbType.NVarChar, 450)
                 {
                     Value = userIdClaim
                 });
 
-                command.Parameters.Add(new SqlParameter("@Total", SqlDbType.Decimal)
+                command.Parameters.Add(new SqlParameter("@Detalle", SqlDbType.NVarChar)
                 {
-                    Precision = 10,
-                    Scale = 2,
-                    Value = request.Total
+                    Value = detalleJson
                 });
 
-                command.Parameters.Add(new SqlParameter("@Detalle", SqlDbType.Xml)
+                await using var reader = await command.ExecuteReaderAsync();
+
+                if (!await reader.ReadAsync())
+                    return StatusCode(500, "No se recibió respuesta al registrar la venta.");
+
+                var response = new RegistrarVentaResponseDto
                 {
-                    Value = request.Detalle
-                });
+                    IdVenta = reader.GetInt32(reader.GetOrdinal("IdVenta")),
+                    Folio = reader.GetString(reader.GetOrdinal("Folio")),
+                    Total = reader.GetDecimal(reader.GetOrdinal("Total"))
+                };
 
-                var result = await command.ExecuteScalarAsync();
-                int idVenta = Convert.ToInt32(result);
-
-                return Ok(idVenta);
+                return Ok(response);
             }
-            catch (SqlException ex) when (ex.Number == 50001 || ex.Number == 50002)
+            catch (SqlException ex) when (
+                ex.Number == 50001 ||
+                ex.Number == 50002 ||
+                ex.Number == 50003 ||
+                ex.Number == 50004 ||
+                ex.Number == 50005 ||
+                ex.Number == 50006 ||
+                ex.Number == 50007 ||
+                ex.Number == 50008 ||
+                ex.Number == 50009 ||
+                ex.Number == 50010)
             {
                 return Conflict(new
                 {
