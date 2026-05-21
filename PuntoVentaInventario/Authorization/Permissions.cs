@@ -7,6 +7,32 @@
             public const string Ver = "home.ver";
         }
 
+        public static class Configuracion
+        {
+            public const string Ver = "configuracion.ver";
+        }
+
+        public static class Usuarios
+        {
+            public const string Ver = "usuarios.ver";
+
+            public const string ActivosVer = "usuarios.activos.ver";
+            public const string InactivosVer = "usuarios.inactivos.ver";
+
+            public const string Crear = "usuarios.crear";
+            public const string Actualizar = "usuarios.actualizar";
+
+            public const string Activar = "usuarios.activar";
+            public const string Desactivar = "usuarios.desactivar";
+        }
+
+        public static class PermisosUsuario
+        {
+            public const string Ver = "usuarios.permisos.ver";
+
+            public const string Actualizar = "usuarios.permisos.actualizar";
+        }
+
         public static class Ventas
         {
             public const string Realizar = "ventas.realizar";
@@ -93,6 +119,19 @@
         public static List<string> All => new()
         {
             Home.Ver,
+
+            Configuracion.Ver,
+
+            Usuarios.Ver,
+            Usuarios.ActivosVer,
+            Usuarios.InactivosVer,
+            Usuarios.Crear,
+            Usuarios.Actualizar,
+            Usuarios.Activar,
+            Usuarios.Desactivar,
+
+            PermisosUsuario.Ver,
+            PermisosUsuario.Actualizar,
 
             Ventas.Realizar,
             Ventas.HistorialVer,

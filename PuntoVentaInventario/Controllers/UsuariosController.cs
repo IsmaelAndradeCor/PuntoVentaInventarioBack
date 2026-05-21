@@ -1,14 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PuntoVentaInventario.Models.Dtos.Requests;
+using PuntoVentaInventario.Models.Dtos.Responses;
 using PuntoVentaInventario.Models.Entities;
 
 namespace PuntoVentaInventario.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Administrador")]
+    //[Authorize(Roles = "Administrador")]
     public class UsuariosController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -22,8 +24,94 @@ namespace PuntoVentaInventario.Controllers
             _roleManager = roleManager;
         }
 
-        [HttpPost("crear_usuario")]
-        public async Task<IActionResult> CrearUsuario([FromBody] CrearUsuarioUpsertDto dto)
+        [HttpGet]
+        public async Task<ActionResult<List<UsuarioPermisosResponseDto>>> ObtenerCatalogoUsuarios()
+        {
+            try
+            {
+                var usuarios = await _userManager.Users
+                    .OrderBy(u => u.UserName)
+                    .ToListAsync();
+
+                var response = new List<UsuarioPermisosResponseDto>();
+
+                foreach (var user in usuarios)
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    var claims = await _userManager.GetClaimsAsync(user);
+
+                    var permissions = claims
+                        .Where(c => c.Type == "permission")
+                        .Select(c => c.Value)
+                        .Distinct()
+                        .OrderBy(p => p)
+                        .ToList();
+
+                    response.Add(new UsuarioPermisosResponseDto
+                    {
+                        Id = user.Id,
+                        UserName = user.UserName ?? string.Empty,
+                        NombreCompleto = user.NombreCompleto,
+                        Activo = user.Activo,
+                        Roles = roles,
+                        Permissions = permissions
+                    });
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    mensaje = $"Error al obtener el catálogo de usuarios: {ex.Message}"
+                });
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<UsuarioPermisosResponseDto>> ObtenerUsuario(string id)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id);
+
+                if (user == null)
+                    return NotFound(new { mensaje = "Usuario no encontrado." });
+
+                var roles = await _userManager.GetRolesAsync(user);
+                var claims = await _userManager.GetClaimsAsync(user);
+
+                var permissions = claims
+                    .Where(c => c.Type == "permission")
+                    .Select(c => c.Value)
+                    .Distinct()
+                    .OrderBy(p => p)
+                    .ToList();
+
+                var response = new UsuarioPermisosResponseDto
+                {
+                    Id = user.Id,
+                    UserName = user.UserName ?? string.Empty,
+                    NombreCompleto = user.NombreCompleto,
+                    Activo = user.Activo,
+                    Roles = roles,
+                    Permissions = permissions
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    mensaje = $"Error al obtener el usuario: {ex.Message}"
+                });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Crearsuario([FromBody] CrearUsuarioUpsertDto dto)
         {
             try
             {
@@ -91,15 +179,15 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
-        [HttpPut("cambiar_nombre_completo/{userName}")]
-        public async Task<IActionResult> CambiarNombreCompleto(string userName, [FromBody] CambiarNombreCompletoUpsertDto dto)
+        [HttpPut("{id}/nombre-completo")]
+        public async Task<IActionResult> CambiarNombreCompleto(string id, [FromBody] CambiarNombreCompletoUpsertDto dto)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(dto.NombreCompleto))
                     return BadRequest(new { mensaje = "El nombre completo es obligatorio." });
 
-                var user = await _userManager.FindByNameAsync(userName.Trim());
+                var user = await _userManager.FindByIdAsync(id);
 
                 if (user == null)
                     return NotFound(new { mensaje = "Usuario no encontrado." });
@@ -133,8 +221,8 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
-        [HttpPut("cambiar_rol/{userName}")]
-        public async Task<IActionResult> CambiarRol(string userName, [FromBody] CambiarRolUpsertDto dto)
+        [HttpPut("{id}/rol")]
+        public async Task<IActionResult> CambiarRol(string id, [FromBody] CambiarRolUpsertDto dto)
         {
             try
             {
@@ -144,7 +232,7 @@ namespace PuntoVentaInventario.Controllers
                 if (dto.Rol != "Empleado")
                     return BadRequest(new { mensaje = "Solo se permite asignar el rol de Empleado." });
 
-                var user = await _userManager.FindByNameAsync(userName.Trim());
+                var user = await _userManager.FindByIdAsync(id);
 
                 if (user == null)
                     return NotFound(new { mensaje = "Usuario no encontrado." });
@@ -203,15 +291,15 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
-        [HttpPut("cambiar_password/{userName}")]
-        public async Task<IActionResult> CambiarPassword(string userName, [FromBody] CambiarPasswordUpsertDto dto)
+        [HttpPut("{id}/password")]
+        public async Task<IActionResult> CambiarPassword(string id, [FromBody] CambiarPasswordUpsertDto dto)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(dto.NuevaPassword))
                     return BadRequest(new { mensaje = "La nueva contraseña es obligatoria." });
 
-                var user = await _userManager.FindByNameAsync(userName.Trim());
+                var user = await _userManager.FindByIdAsync(id);
 
                 if (user == null)
                     return NotFound(new { mensaje = "Usuario no encontrado." });
@@ -243,12 +331,12 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
-        [HttpPut("activar/{userName}")]
-        public async Task<IActionResult> ActivarUsuario(string userName)
+        [HttpPut("{id}/activar")]
+        public async Task<IActionResult> ActivarUsuario(string id)
         {
             try
             {
-                var user = await _userManager.FindByNameAsync(userName.Trim());
+                var user = await _userManager.FindByIdAsync(id);
 
                 if (user == null)
                     return NotFound(new { mensaje = "Usuario no encontrado." });
@@ -282,21 +370,26 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
-        [HttpPut("desactivar/{userName}")]
-        public async Task<IActionResult> DesactivarUsuario(string userName)
+        [HttpPut("{id}/desactivar")]
+        public async Task<IActionResult> DesactivarUsuario(string id)
         {
             try
             {
-                var user = await _userManager.FindByNameAsync(userName.Trim());
+                var user = await _userManager.FindByIdAsync(id);
 
                 if (user == null)
                     return NotFound(new { mensaje = "Usuario no encontrado." });
 
-                if (user.UserName == "admin")
+                var rolesActuales = await _userManager.GetRolesAsync(user);
+                if (rolesActuales.Contains("Administrador"))
                     return BadRequest(new { mensaje = "No se puede desactivar el usuario administrador principal." });
+
+                //if (user.UserName == "admin")
+                //    return BadRequest(new { mensaje = "No se puede desactivar el usuario administrador principal." });
 
                 if (user.Activo == false)
                     return BadRequest(new { mensaje = "Usuario ya desactivado." });
+
 
                 user.Activo = false;
 

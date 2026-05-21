@@ -1,12 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
-
-public partial class AddOrAlterSpRegistrarVenta : Migration
+namespace PuntoVentaInventario.Migrations
 {
-    protected override void Up(MigrationBuilder migrationBuilder)
+
+    public partial class AddOrAlterSpRegistrarVenta : Migration
     {
-        migrationBuilder.Sql("""
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.Sql("""
 CREATE OR ALTER PROCEDURE [dbo].[sp_RegistrarVenta]
     @IdUsuario NVARCHAR(450),
     @Detalle NVARCHAR(MAX)
@@ -226,13 +228,14 @@ BEGIN
     END CATCH
 END
 """);
-    }
+        }
 
-    protected override void Down(MigrationBuilder migrationBuilder)
-    {
-        migrationBuilder.Sql("""
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.Sql("""
 IF OBJECT_ID('dbo.sp_RegistrarVenta', 'P') IS NOT NULL
     DROP PROCEDURE dbo.sp_RegistrarVenta
 """);
+        }
     }
 }
