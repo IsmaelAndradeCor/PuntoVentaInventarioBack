@@ -52,6 +52,7 @@ namespace PuntoVentaInventario.Authorization
                 {
                     Key = "ventas",
                     Titulo = "Ventas",
+                    Permission = Permissions.Ventas.Ver,
                     Hijos =
                     [
                         new() { Key = "ventas.realizar", Titulo = "Realizar", Permission = Permissions.Ventas.Realizar },

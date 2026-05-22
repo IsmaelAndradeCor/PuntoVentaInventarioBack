@@ -392,12 +392,16 @@ namespace PuntoVentaInventario.Controllers
 
         [Authorize(Policy = Permissions.Productos.Actualizar)]
         [HttpPut("actualizar_producto")]
-        public async Task<IActionResult> ActualizarProducto([FromBody] ProductoUpsertDto dto)
+        public async Task<ActionResult<ProductoResponseDto>> ActualizarProducto([FromBody] ProductoUpsertDto dto)
         {
             dto.Codigo = dto.Codigo.Trim();
 
             var producto = await _context.Productos
+                .Include(p => p.Categoria)
+                .Include(p => p.Marca)
+                .Include(p => p.UnidadMedida)
                 .Include(p => p.ProductoProveedores)
+                    .ThenInclude(pp => pp.Proveedor)
                 .FirstOrDefaultAsync(p => p.Codigo.Trim() == dto.Codigo && p.Activo);
 
             if (producto == null)
@@ -445,7 +449,57 @@ namespace PuntoVentaInventario.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return NoContent();
+
+            producto = await _context.Productos
+                .Include(p => p.Categoria)
+                .Include(p => p.Marca)
+                .Include(p => p.UnidadMedida)
+                .Include(p => p.ProductoProveedores)
+                    .ThenInclude(pp => pp.Proveedor)
+                .FirstAsync(p => p.Id == producto.Id);
+
+            var response = new ProductoResponseDto
+            {
+                Id = producto.Id,
+                Codigo = producto.Codigo,
+                Nombre = producto.Nombre,
+                Descripcion = producto.Descripcion,
+                Costo = producto.Costo,
+                Precio = producto.Precio,
+                Stock = producto.Stock,
+                StockMinimo = producto.StockMinimo,
+
+                Categoria = producto.Categoria == null ? null : new CategoriaResponseDto
+                {
+                    Id = producto.Categoria.Id,
+                    Nombre = producto.Categoria.Nombre
+                },
+
+                Marca = producto.Marca == null ? null : new MarcaResponseDto
+                {
+                    Id = producto.Marca.Id,
+                    Nombre = producto.Marca.Nombre
+                },
+
+                UnidadMedida = producto.UnidadMedida == null ? null : new UnidadMedidaResponseDto
+                {
+                    Id = producto.UnidadMedida.Id,
+                    Nombre = producto.UnidadMedida.Nombre,
+                    Clave = producto.UnidadMedida.Clave,
+                    PermiteDecimales = producto.UnidadMedida.Activo
+                },
+
+                Proveedores = producto.ProductoProveedores
+                    .Where(pp => pp.Proveedor != null)
+                    .Select(pp => new ProveedorResponseDto
+                    {
+                        Id = pp.Proveedor.Id,
+                        Nombre = pp.Proveedor.Nombre
+                    })
+                    .ToList()
+            };
+
+            return Ok(response);
         }
 
         [Authorize(Policy = Permissions.Productos.Activar)]

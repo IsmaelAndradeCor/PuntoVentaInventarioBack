@@ -35,6 +35,8 @@
 
         public static class Ventas
         {
+            public const string Ver = "ventas.ver";
+
             public const string Realizar = "ventas.realizar";
             public const string HistorialVer = "ventas.historial.ver";
         }
@@ -133,6 +135,7 @@
             PermisosUsuario.Ver,
             PermisosUsuario.Actualizar,
 
+            Ventas.Ver,
             Ventas.Realizar,
             Ventas.HistorialVer,
 
