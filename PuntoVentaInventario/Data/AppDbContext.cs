@@ -12,7 +12,6 @@ namespace PuntoVentaInventario.Data
         public DbSet<Producto> Productos { get; set; }
         public DbSet<Venta> Ventas { get; set; }
         public DbSet<DetalleVenta> DetalleVentas { get; set; }
-        public DbSet<GenerarVentasDto> GenerarVentasDto { get; set; }
         public DbSet<Categoria> Categorias { get; set; }
         public DbSet<Marca> Marcas { get; set; }
         public DbSet<UnidadMedida> UnidadesMedida { get; set; }
@@ -106,8 +105,6 @@ namespace PuntoVentaInventario.Data
                 .HasOne(pp => pp.Proveedor)
                 .WithMany(p => p.ProductoProveedores)
                 .HasForeignKey(pp => pp.IdProveedor);
-
-            modelBuilder.Entity<GenerarVentasDto>().HasNoKey();
 
             modelBuilder.Entity<Folio>(entity =>
             {

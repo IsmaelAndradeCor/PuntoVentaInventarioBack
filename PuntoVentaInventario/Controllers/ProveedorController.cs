@@ -206,7 +206,7 @@ namespace PuntoVentaInventario.Controllers
             try
             {
                 var proveedor = await _context.Proveedores
-                    .FirstOrDefaultAsync(m => m.Id == idProveedor && m.Activo);
+                    .FirstOrDefaultAsync(m => m.Id == idProveedor && !m.Activo);
 
                 if (proveedor == null)
                     return NotFound(new { mensaje = "Proveedor no encontrado" });

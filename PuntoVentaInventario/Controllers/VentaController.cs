@@ -23,25 +23,93 @@ namespace PuntoVentaInventario.Controllers
             _context = context;
         }
 
-        [Authorize(Policy = Permissions.Ventas.HistorialVer)]
+        //[Authorize(Policy = Permissions.Ventas.HistorialVer)]
+        //[HttpGet("generar_ventas")]
+        //public async Task<IActionResult> GetGenerarVentas()
+        //{
+        //    try
+        //    {
+        //        var ventas = await _context.GenerarVentasDto
+        //            .FromSqlRaw("EXEC sp_GenerarVentas")
+        //            .ToListAsync();
+
+        //        return Ok(ventas);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Error al registrar la venta: {ex.Message}");
+        //    }
+        //}
+
+        //[Authorize(Policy = Permissions.Ventas.HistorialVer)]
         [HttpGet("generar_ventas")]
-        public async Task<IActionResult> GetGenerarVentas()
+        public async Task<IActionResult> GetGenerarVentas([FromQuery] GenerarVentasRequestDto request)
         {
             try
             {
-                var ventas = await _context.GenerarVentasDto
-                    .FromSqlRaw("EXEC sp_GenerarVentas")
+                var query = _context.Ventas
+                    .AsNoTracking()
+                    .Where(v =>
+                        (!request.FechaInicio.HasValue || v.FechaVenta.Date >= request.FechaInicio.Value.Date) &&
+                        (!request.FechaFin.HasValue || v.FechaVenta.Date <= request.FechaFin.Value.Date));
+
+                if (request.IncluirDetalle)
+                {
+                    var ventasConDetalle = await query
+                        .Select(v => new GenerarVentaResponseDto
+                        {
+                            IdVenta = v.Id,
+                            Folio = v.Folio,
+                            FechaVenta = v.FechaVenta,
+                            Subtotal = v.Subtotal,
+                            Descuento = v.Descuento,
+                            CostoTotal = v.Detalles.Sum(d => (decimal?)d.CostoTotal) ?? 0,
+                            Total = v.Total,
+                            Ganancias = v.Total - (v.Detalles.Sum(d => (decimal?)d.CostoTotal) ?? 0),
+                            FormaPago = v.FormaPago,
+                            Detalles = v.Detalles.Select(d => new GenerarVentaDetalleResponseDto
+                            {
+                                IdDetalleVenta = d.Id,
+                                IdProducto = d.IdProducto,
+                                CodigoProducto = d.CodigoProducto,
+                                NombreProducto = d.NombreProducto,
+                                Cantidad = d.Cantidad,
+                                CostoUnitario = d.CostoUnitario,
+                                CostoTotal = d.CostoTotal,
+                                PrecioUnitario = d.PrecioUnitario,
+                                PrecioTotal = d.PrecioTotal
+                            }).ToList()
+                        })
+                        .OrderByDescending(v => v.FechaVenta)
+                        .ToListAsync();
+
+                    return Ok(ventasConDetalle);
+                }
+
+                var ventasSinDetalle = await query
+                    .Select(v => new GenerarVentaResponseDto
+                    {
+                        IdVenta = v.Id,
+                        Folio = v.Folio,
+                        FechaVenta = v.FechaVenta,
+                        Subtotal = v.Subtotal,
+                        Descuento = v.Descuento,
+                        CostoTotal = v.Detalles.Sum(d => (decimal?)d.CostoTotal) ?? 0,
+                        Total = v.Total,
+                        Ganancias = v.Total - (v.Detalles.Sum(d => (decimal?)d.CostoTotal) ?? 0),
+                        FormaPago = v.FormaPago,
+                        Detalles = new List<GenerarVentaDetalleResponseDto>()
+                    })
+                    .OrderByDescending(v => v.FechaVenta)
                     .ToListAsync();
 
-                return Ok(ventas);
+                return Ok(ventasSinDetalle);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al registrar la venta: {ex.Message}");
+                return StatusCode(500, $"Error al generar ventas: {ex.Message}");
             }
         }
-
-
 
         [Authorize(Policy = Permissions.Ventas.Realizar)]
         [HttpPost("realizar_venta")]
