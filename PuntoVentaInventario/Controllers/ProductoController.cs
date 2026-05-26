@@ -517,7 +517,6 @@ namespace PuntoVentaInventario.Controllers
             if (string.IsNullOrWhiteSpace(userIdClaim))
                 return Unauthorized("No se pudo obtener el usuario autenticado.");
 
-            // Soft delete: solo marca como inactivo
             producto.Activo = true;
             producto.FechaEliminacion = null;
             producto.IdUsuarioEliminacion = null;

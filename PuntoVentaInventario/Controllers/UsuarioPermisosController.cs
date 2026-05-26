@@ -21,19 +21,21 @@ namespace PuntoVentaInventario.Controllers
         {
             _userManager = userManager;
         }
-
+        [Authorize(Policy = Permissions.PermisosUsuario.Ver)]
         [HttpGet("permisos/catalogo")]
         public IActionResult ObtenerCatalogoPermisos()
         {
             return Ok(Permissions.All.OrderBy(x => x).ToList());
         }
 
+        [Authorize(Policy = Permissions.PermisosUsuario.Ver)]
         [HttpGet("catalogo-ui")]
         public IActionResult ObtenerCatalogoUi()
         {
             return Ok(PermissionsUiCatalog.Get());
         }
 
+        [Authorize(Policy = Permissions.PermisosUsuario.Actualizar)]
         [HttpPost("{id}/permisos/{permission}")]
         public async Task<IActionResult> AsignarPermiso(string id, string permission)
         {
@@ -81,6 +83,7 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.PermisosUsuario.Actualizar)]
         [HttpDelete("{id}/permisos/{permission}")]
         public async Task<IActionResult> QuitarPermiso(string id, string permission)
         {

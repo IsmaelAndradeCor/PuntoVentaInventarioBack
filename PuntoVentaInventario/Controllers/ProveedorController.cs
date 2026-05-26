@@ -83,7 +83,10 @@ namespace PuntoVentaInventario.Controllers
                     .Select(p => new ProveedorResponseDto
                     {
                         Id = p.Id,
-                        Nombre = p.Nombre
+                        Nombre = p.Nombre,
+                        Telefono = p.Telefono,
+                        Contacto = p.Contacto,
+                        Correo = p.Correo
                     })
                     .FirstOrDefaultAsync();
 
@@ -123,6 +126,11 @@ namespace PuntoVentaInventario.Controllers
                     Correo = dto.Correo,
                     Activo = true
                 };
+
+                proveedor.Nombre = dto.Nombre.Trim();
+                proveedor.Contacto = string.IsNullOrWhiteSpace(dto.Contacto) ? null : dto.Contacto.Trim();
+                proveedor.Telefono = string.IsNullOrWhiteSpace(dto.Telefono) ? null : dto.Telefono.Trim();
+                proveedor.Correo = string.IsNullOrWhiteSpace(dto.Correo) ? null : dto.Correo.Trim();
 
                 _context.Proveedores.Add( proveedor );
                 await _context.SaveChangesAsync();

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PuntoVentaInventario.Authorization;
 using PuntoVentaInventario.Models.Dtos.Requests;
 using PuntoVentaInventario.Models.Dtos.Responses;
 using PuntoVentaInventario.Models.Entities;
@@ -24,12 +25,14 @@ namespace PuntoVentaInventario.Controllers
             _roleManager = roleManager;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<List<UsuarioPermisosResponseDto>>> ObtenerCatalogoUsuarios()
+        [Authorize(Policy = Permissions.Usuarios.ActivosVer)]
+        [HttpGet("activos")]
+        public async Task<ActionResult<List<UsuarioPermisosResponseDto>>> ObtenerUsuariosActivos()
         {
             try
             {
                 var usuarios = await _userManager.Users
+                    .Where(u => u.Activo)
                     .OrderBy(u => u.UserName)
                     .ToListAsync();
 
@@ -69,6 +72,54 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Usuarios.InactivosVer)]
+        [HttpGet("inactivos")]
+        public async Task<ActionResult<List<UsuarioPermisosResponseDto>>> ObtenerUsuariosInactivos()
+        {
+            try
+            {
+                var usuarios = await _userManager.Users
+                    .Where(u => u.Activo!)
+                    .OrderBy(u => u.UserName)
+                    .ToListAsync();
+
+                var response = new List<UsuarioPermisosResponseDto>();
+
+                foreach (var user in usuarios)
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    var claims = await _userManager.GetClaimsAsync(user);
+
+                    var permissions = claims
+                        .Where(c => c.Type == "permission")
+                        .Select(c => c.Value)
+                        .Distinct()
+                        .OrderBy(p => p)
+                        .ToList();
+
+                    response.Add(new UsuarioPermisosResponseDto
+                    {
+                        Id = user.Id,
+                        UserName = user.UserName ?? string.Empty,
+                        NombreCompleto = user.NombreCompleto,
+                        Activo = user.Activo,
+                        Roles = roles,
+                        Permissions = permissions
+                    });
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    mensaje = $"Error al obtener el catálogo de usuarios: {ex.Message}"
+                });
+            }
+        }
+
+        [Authorize(Policy = Permissions.Usuarios.Actualizar)]
         [HttpGet("{id}")]
         public async Task<ActionResult<UsuarioPermisosResponseDto>> ObtenerUsuario(string id)
         {
@@ -110,6 +161,7 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Usuarios.Crear)]
         [HttpPost]
         public async Task<IActionResult> Crearsuario([FromBody] CrearUsuarioUpsertDto dto)
         {
@@ -179,6 +231,7 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Usuarios.Actualizar)]
         [HttpPut("{id}/nombre-completo")]
         public async Task<IActionResult> CambiarNombreCompleto(string id, [FromBody] CambiarNombreCompletoUpsertDto dto)
         {
@@ -221,6 +274,7 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Usuarios.Actualizar)]
         [HttpPut("{id}/rol")]
         public async Task<IActionResult> CambiarRol(string id, [FromBody] CambiarRolUpsertDto dto)
         {
@@ -291,6 +345,7 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Usuarios.Actualizar)]
         [HttpPut("{id}/password")]
         public async Task<IActionResult> CambiarPassword(string id, [FromBody] CambiarPasswordUpsertDto dto)
         {
@@ -331,6 +386,7 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Usuarios.Activar)]
         [HttpPut("{id}/activar")]
         public async Task<IActionResult> ActivarUsuario(string id)
         {
@@ -370,6 +426,7 @@ namespace PuntoVentaInventario.Controllers
             }
         }
 
+        [Authorize(Policy = Permissions.Usuarios.Desactivar)]
         [HttpPut("{id}/desactivar")]
         public async Task<IActionResult> DesactivarUsuario(string id)
         {

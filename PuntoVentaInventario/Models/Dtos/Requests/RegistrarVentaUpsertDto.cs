@@ -14,7 +14,7 @@ namespace PuntoVentaInventario.Models.Dtos.Requests
         [Range(1, int.MaxValue)]
         public int IdProducto { get; set; }
 
-        [Range(typeof(decimal), "0.01", "9999999999")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "La cantidad de algunos productos debe ser mayor a 0 (cero)")]
         public decimal Cantidad { get; set; }
     }
 }

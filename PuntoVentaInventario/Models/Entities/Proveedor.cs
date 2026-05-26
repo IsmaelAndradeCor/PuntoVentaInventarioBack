@@ -18,6 +18,7 @@ namespace PuntoVentaInventario.Models.Entities
         [MaxLength(100)]
         public string? Correo { get; set; }
 
+        [Required]
         public bool Activo { get; set; } = true;
 
         public ICollection<ProductoProveedor> ProductoProveedores { get; set; } = new List<ProductoProveedor>();
