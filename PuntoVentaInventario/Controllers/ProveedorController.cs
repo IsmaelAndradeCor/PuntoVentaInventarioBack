@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using PuntoVentaInventario.Authorization;
 using PuntoVentaInventario.Data;
 using PuntoVentaInventario.Models.Dtos.Requests;
 using PuntoVentaInventario.Models.Dtos.Responses;
 using PuntoVentaInventario.Models.Entities;
+using System.Data;
+using System.Security.Claims;
 
 namespace PuntoVentaInventario.Controllers
 {
@@ -22,7 +25,13 @@ namespace PuntoVentaInventario.Controllers
 
         [Authorize(Policy = Permissions.Proveedores.ActivosVer)]
         [HttpGet("listar_proveedores_activos")]
-        public async Task<IActionResult> GetProveedoresActivos() {
+        public async Task<IActionResult> GetProveedoresActivos() 
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userIdClaim))
+                return Unauthorized("No se pudo obtener el usuario autenticado.");
+
             try
             {
                 var proveedores = await _context.Proveedores
@@ -49,6 +58,11 @@ namespace PuntoVentaInventario.Controllers
         [HttpGet("listar_proveedores_inactivos")]
         public async Task<IActionResult> GetProveedoresInactivos()
         {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userIdClaim))
+                return Unauthorized("No se pudo obtener el usuario autenticado.");
+
             try
             {
                 var proveedores = await _context.Proveedores
@@ -75,6 +89,11 @@ namespace PuntoVentaInventario.Controllers
         [HttpGet("obtener_proveedor/{id:int}")]
         public async Task<IActionResult> GetProveedorPorId(int id)
         {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userIdClaim))
+                return Unauthorized("No se pudo obtener el usuario autenticado.");
+
             try
             {
                 var proveedor = await _context.Proveedores
@@ -105,6 +124,11 @@ namespace PuntoVentaInventario.Controllers
         [HttpPost("crear_proveedor")]
         public async Task<IActionResult> CrearProveedor([FromBody] ProveedorUpsertDto dto)
         {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userIdClaim))
+                return Unauthorized("No se pudo obtener el usuario autenticado.");
+
             try
             {
                 var nombreNormalizado = dto.Nombre.Trim();
@@ -156,6 +180,10 @@ namespace PuntoVentaInventario.Controllers
         [HttpPut("actualizar_proveedor/{idProveedor:int}")]
         public async Task<ActionResult<ProveedorResponseDto>> ActualizarProveedor(int idProveedor, [FromBody] ProveedorUpsertDto dto)
         {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userIdClaim))
+                return Unauthorized("No se pudo obtener el usuario autenticado.");
             try
             {
                 var proveedor = await _context.Proveedores
@@ -203,6 +231,11 @@ namespace PuntoVentaInventario.Controllers
         [HttpPut("activar_proveedor/{idProveedor:int}")]
         public async Task<IActionResult> ActivarProveedor(int idProveedor)
         {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userIdClaim))
+                return Unauthorized("No se pudo obtener el usuario autenticado.");
+
             try
             {
                 var proveedor = await _context.Proveedores
@@ -227,6 +260,11 @@ namespace PuntoVentaInventario.Controllers
         [HttpDelete("desactivar_proveedor/{idProveedor:int}")]
         public async Task<IActionResult> DesactivarProveedor(int idProveedor)
         {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userIdClaim))
+                return Unauthorized("No se pudo obtener el usuario autenticado.");
+
             try
             {
                 var proveedor = await _context.Proveedores
@@ -250,6 +288,128 @@ namespace PuntoVentaInventario.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"Error al eliminar al Proveedor: {ex.Message}");
+            }
+        }
+
+        [Authorize(Policy = Permissions.Proveedores.Pagar)]
+        [HttpPost("registrar_pago_proveedor")]
+        public async Task<ActionResult<RegistrarPagoProveedorResponseDto>> RegistrarPagoProveedor([FromBody] RegistrarPagoProveedorUpsertDto request)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userIdClaim))
+                return Unauthorized("No se pudo obtener el usuario autenticado.");
+
+            try
+            {
+                var connection = _context.Database.GetDbConnection();
+
+                if (connection.State != ConnectionState.Open)
+                    await connection.OpenAsync();
+
+                await using var command = connection.CreateCommand();
+                command.CommandText = "sp_RegistrarPagoProveedor";
+                command.CommandType = CommandType.StoredProcedure;
+
+                command.Parameters.Add(new SqlParameter("@IdProveedor", SqlDbType.Int)
+                {
+                    Value = request.IdProveedor
+                });
+
+                command.Parameters.Add(new SqlParameter("@Monto", SqlDbType.Decimal)
+                {
+                    Precision = 18,
+                    Scale = 2,
+                    Value = request.Monto
+                });
+
+                command.Parameters.Add(new SqlParameter("@MetodoPago", SqlDbType.NVarChar, 50)
+                {
+                    Value = request.MetodoPago
+                });
+
+                command.Parameters.Add(new SqlParameter("@Referencia", SqlDbType.NVarChar, 100)
+                {
+                    Value = string.IsNullOrWhiteSpace(request.Referencia)
+                        ? DBNull.Value
+                        : request.Referencia.Trim()
+                });
+
+                command.Parameters.Add(new SqlParameter("@Observaciones", SqlDbType.NVarChar, 500)
+                {
+                    Value = string.IsNullOrWhiteSpace(request.Observaciones)
+                        ? DBNull.Value
+                        : request.Observaciones.Trim()
+                });
+
+                command.Parameters.Add(new SqlParameter("@IdUsuario", SqlDbType.NVarChar, 450)
+                {
+                    Value = userIdClaim
+                });
+
+                await using var reader = await command.ExecuteReaderAsync();
+
+                if (!await reader.ReadAsync())
+                    return StatusCode(500, "No se recibió respuesta al registrar el pago al proveedor.");
+
+                var response = new RegistrarPagoProveedorResponseDto
+                {
+                    IdPagoProveedor = reader.GetInt32(reader.GetOrdinal("IdPagoProveedor")),
+                    Folio = reader.GetString(reader.GetOrdinal("Folio")),
+                    Monto = reader.GetDecimal(reader.GetOrdinal("Monto"))
+                };
+
+                return Ok(response);
+            }
+            catch (SqlException ex) when (
+                ex.Number == 50101 ||
+                ex.Number == 50102 ||
+                ex.Number == 50103 ||
+                ex.Number == 50104 ||
+                ex.Number == 50105 ||
+                ex.Number == 50106 ||
+                ex.Number == 50107)
+            {
+                return Conflict(new
+                {
+                    mensaje = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al registrar el pago al proveedor: {ex.Message}");
+            }
+        }
+
+        [Authorize(Policy = Permissions.Proveedores.PagosVer)]
+        [HttpGet("listar_pagos_proveedores")]
+        public async Task<IActionResult> GetPagosProveedores()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userIdClaim))
+                return Unauthorized("No se pudo obtener el usuario autenticado.");
+
+            try
+            {
+                var pagoProveedores = await _context.PagosProveedores
+                    .Select(p => new PagosProveedoresResponseDto
+                    {
+                        Id = p.Id,
+                        Folio = p.Folio,
+                        NombreProveedor = p.Proveedor.Nombre,
+                        Monto = p.Monto,
+                        MetodoPago = p.MetodoPago,
+                        Referencia = p.Referencia ?? "",
+                        Observaciones = p.Observaciones ?? "",
+                        FechaPago = p.FechaPago
+                    })
+                    .ToListAsync();
+                return Ok(pagoProveedores);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al obtener los pagos a proveedores: {ex.Message}");
             }
         }
     }

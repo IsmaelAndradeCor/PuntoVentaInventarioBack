@@ -16,6 +16,7 @@ namespace PuntoVentaInventario.Data
         public DbSet<Marca> Marcas { get; set; }
         public DbSet<UnidadMedida> UnidadesMedida { get; set; }
         public DbSet<Proveedor> Proveedores { get; set; }
+        public DbSet<PagoProveedor> PagosProveedores { get; set; }
         public DbSet<ProductoProveedor> ProductoProveedores { get; set; }
         public DbSet<Folio> Folios { get; set; }
 
@@ -136,6 +137,39 @@ namespace PuntoVentaInventario.Data
                         UltimoNumero = 0
                     }
                 );
+            });
+
+            modelBuilder.Entity<PagoProveedor>(entity =>
+            {
+                entity.ToTable("PagosProveedores");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Folio)
+                    .HasMaxLength(30)
+                    .IsRequired();
+
+                entity.Property(e => e.Monto)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(e => e.MetodoPago)
+                    .HasMaxLength(50)
+                    .IsRequired();
+
+                entity.Property(e => e.Referencia)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Observaciones)
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.IdUsuario)
+                    .HasMaxLength(450)
+                    .IsRequired();
+
+                entity.HasOne(e => e.Proveedor)
+                    .WithMany(p => p.PagosProveedores)
+                    .HasForeignKey(e => e.IdProveedor)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

@@ -22,5 +22,7 @@ namespace PuntoVentaInventario.Models.Entities
         public bool Activo { get; set; } = true;
 
         public ICollection<ProductoProveedor> ProductoProveedores { get; set; } = new List<ProductoProveedor>();
+
+        public ICollection<PagoProveedor> PagosProveedores { get; set; } = new List<PagoProveedor>();
     }
 }

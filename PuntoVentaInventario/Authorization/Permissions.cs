@@ -116,6 +116,9 @@
 
             public const string Activar = "proveedores.activar";
             public const string Desactivar = "proveedores.desactivar";
+
+            public const string Pagar = "proveedores.pagar";
+            public const string PagosVer = "proveedores.pagos.ver";
         }
 
         public static List<string> All => new()
@@ -181,7 +184,9 @@
             Proveedores.Crear,
             Proveedores.Actualizar,
             Proveedores.Activar,
-            Proveedores.Desactivar
+            Proveedores.Desactivar,
+            Proveedores.Pagar,
+            Proveedores.PagosVer
         };
     }
 }

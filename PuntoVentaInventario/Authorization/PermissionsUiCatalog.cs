@@ -142,7 +142,9 @@ namespace PuntoVentaInventario.Authorization
                         new() { Key = "proveedores.crear", Titulo = "Crear", Permission = Permissions.Proveedores.Crear },
                         new() { Key = "proveedores.actualizar", Titulo = "Actualizar", Permission = Permissions.Proveedores.Actualizar },
                         new() { Key = "proveedores.activar", Titulo = "Activar", Permission = Permissions.Proveedores.Activar },
-                        new() { Key = "proveedores.desactivar", Titulo = "Desactivar", Permission = Permissions.Proveedores.Desactivar }
+                        new() { Key = "proveedores.desactivar", Titulo = "Desactivar", Permission = Permissions.Proveedores.Desactivar },
+                        new() { Key = "proveedores.pagar", Titulo = "Pagar a proveedores", Permission = Permissions.Proveedores.Pagar },
+                        new() { Key = Permissions.Proveedores.PagosVer, Titulo = "Pagos a proveedores", Permission = Permissions.Proveedores.PagosVer }
                     ]
                 }
             };

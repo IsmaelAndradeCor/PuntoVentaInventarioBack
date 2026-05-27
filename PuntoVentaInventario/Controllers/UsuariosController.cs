@@ -196,8 +196,8 @@ namespace PuntoVentaInventario.Controllers
                 {
                     return BadRequest(new
                     {
-                        mensaje = "No se pudo crear el usuario.",
-                        errores = result.Errors.Select(e => e.Description)
+                        //mensaje = "No se pudo crear el usuario.",
+                        mensaje = result.Errors.Select(e => e.Description)
                     });
                 }
 
@@ -214,13 +214,15 @@ namespace PuntoVentaInventario.Controllers
                     });
                 }
 
-                return Ok(new
-                {
-                    mensaje = "Usuario creado correctamente.",
-                    userName = nuevoUsuario.UserName,
-                    nombreCompleto = nuevoUsuario.NombreCompleto,
-                    rol = dto.Rol
-                });
+                return Ok();
+
+                //return Ok(new
+                //{
+                //    mensaje = "Usuario creado correctamente.",  
+                //    userName = nuevoUsuario.UserName,
+                //    nombreCompleto = nuevoUsuario.NombreCompleto,
+                //    rol = dto.Rol
+                //});
             }
             catch (Exception ex)
             {
