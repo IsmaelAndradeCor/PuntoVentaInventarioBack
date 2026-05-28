@@ -19,6 +19,8 @@ namespace PuntoVentaInventario.Data
         public DbSet<PagoProveedor> PagosProveedores { get; set; }
         public DbSet<ProductoProveedor> ProductoProveedores { get; set; }
         public DbSet<Folio> Folios { get; set; }
+        public DbSet<MetodoPago> MetodosPago { get; set; }
+        public DbSet<AperturaCaja> AperturasCaja { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -170,6 +172,53 @@ namespace PuntoVentaInventario.Data
                     .WithMany(p => p.PagosProveedores)
                     .HasForeignKey(e => e.IdProveedor)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<MetodoPago>(entity =>
+            {
+                entity.ToTable("MetodosPago");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Nombre)
+                    .HasMaxLength(50)
+                    .IsRequired();
+
+                entity.HasIndex(e => e.Nombre)
+                    .IsUnique();
+
+                entity.HasData(
+                    new MetodoPago { Id = 1, Nombre = "Efectivo", Activo = true, AfectaCaja = true },
+                    new MetodoPago { Id = 2, Nombre = "Transferencia", Activo = true, AfectaCaja = false },
+                    new MetodoPago { Id = 3, Nombre = "Terminal", Activo = true, AfectaCaja = false },
+                    new MetodoPago { Id = 4, Nombre = "Caja", Activo = true, AfectaCaja = true }
+                );
+            });
+
+            modelBuilder.Entity<AperturaCaja>(entity =>
+            {
+                entity.ToTable("AperturasCaja");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.FechaOperacion)
+                    .HasColumnType("date")
+                    .IsRequired();
+
+                entity.Property(e => e.MontoInicial)
+                    .HasColumnType("decimal(18,2)")
+                    .IsRequired();
+
+                entity.Property(e => e.FechaRegistro)
+                    .HasColumnType("datetime2")
+                    .IsRequired();
+
+                entity.Property(e => e.IdUsuario)
+                    .HasMaxLength(450)
+                    .IsRequired();
+
+                entity.HasIndex(e => e.FechaOperacion)
+                    .IsUnique();
             });
         }
     }
