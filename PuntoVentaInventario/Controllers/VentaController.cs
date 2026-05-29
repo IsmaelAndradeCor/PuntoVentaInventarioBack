@@ -24,24 +24,6 @@ namespace PuntoVentaInventario.Controllers
         }
 
         //[Authorize(Policy = Permissions.Ventas.HistorialVer)]
-        //[HttpGet("generar_ventas")]
-        //public async Task<IActionResult> GetGenerarVentas()
-        //{
-        //    try
-        //    {
-        //        var ventas = await _context.GenerarVentasDto
-        //            .FromSqlRaw("EXEC sp_GenerarVentas")
-        //            .ToListAsync();
-
-        //        return Ok(ventas);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, $"Error al registrar la venta: {ex.Message}");
-        //    }
-        //}
-
-        //[Authorize(Policy = Permissions.Ventas.HistorialVer)]
         [HttpGet("generar_ventas")]
         public async Task<IActionResult> GetGenerarVentas([FromQuery] GenerarVentasRequestDto request)
         {

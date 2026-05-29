@@ -15,4 +15,3 @@ VALUES
 ('Electrónica y accesorios', 1),
 ('Hogar y cocina', 1),
 ('Otros', 1);
-

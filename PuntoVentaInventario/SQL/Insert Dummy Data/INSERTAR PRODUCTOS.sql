@@ -124,4 +124,3 @@ VALUES
 ('P0098','Jumex Guayaba 473 ml','Néctar Jumex sabor guayaba',9.50,14.00,30,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,13,6),
 ('P0099','Del Valle Mango 1 L','Jugo Del Valle mango 1 litro',18.00,27.00,20,5,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,14,11),
 ('P0100','Gatorade Lima Limón 1 L','Bebida deportiva Gatorade lima limón',20.00,30.00,20,5,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,31,11);
-

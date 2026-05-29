@@ -1,14 +1,3 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-
-#nullable disable
-namespace PuntoVentaInventario.Migrations
-{
-
-    public partial class AddOrAlterSpRegistrarVenta : Migration
-    {
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.Sql(@"
 CREATE OR ALTER PROCEDURE [dbo].[sp_RegistrarVenta]
     @IdUsuario NVARCHAR(450),
     @Detalle NVARCHAR(MAX),
@@ -228,15 +217,3 @@ BEGIN
         THROW;
     END CATCH
 END
-");
-        }
-
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.Sql(
-            @"
-            DROP PROCEDURE IF EXISTS sp_RegistrarVenta;
-            ");
-        }
-    }
-}

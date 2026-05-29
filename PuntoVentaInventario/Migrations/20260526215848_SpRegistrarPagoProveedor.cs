@@ -57,7 +57,8 @@ namespace PuntoVentaInventario.Migrations
                 column: "IdProveedor");
 
             migrationBuilder.Sql(
-                @"create or ALTER PROCEDURE [dbo].[sp_RegistrarPagoProveedor]
+                @"
+create or ALTER PROCEDURE [dbo].[sp_RegistrarPagoProveedor]
     @IdProveedor INT,
     @Monto DECIMAL(18,2),
     @MetodoPago NVARCHAR(50),
@@ -166,7 +167,8 @@ BEGIN
 
         THROW;
     END CATCH
-END");
+END
+");
         }
 
         /// <inheritdoc />
@@ -174,7 +176,7 @@ END");
         {
             migrationBuilder.Sql(
             @"
-            DROP PROCEDURE IF EXISTS [dbo].[sp_RegistrarPagoProveedor];
+            DROP PROCEDURE IF EXISTS sp_RegistrarPagoProveedor;
             ");
 
             migrationBuilder.DropTable(

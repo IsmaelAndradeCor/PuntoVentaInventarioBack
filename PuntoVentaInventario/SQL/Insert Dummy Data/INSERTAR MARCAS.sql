@@ -1,4 +1,3 @@
-
 INSERT INTO Marcas (Nombre, Activo)
 VALUES
 ('Coca-Cola', 1),

@@ -1,41 +1,40 @@
 INSERT INTO Proveedores (Nombre, Contacto, Telefono, Correo, Activo)
 VALUES
-('Zorro Abarrotero', 'Vialidad de la Barranca No. 6, Huixquilucan, Estado de M�xico', '5552452720', 'atencionzorro@asezor.com', 1),
-('Scorpion', 'Av. de los Cien Metros 795, 3er Piso, Gustavo A. Madero, Ciudad de M�xico', '5557479300', NULL, 1),
-('B�sicos Decasa', NULL, NULL, NULL, 1),
+('Zorro Abarrotero', 'Vialidad de la Barranca No. 6, Huixquilucan, Estado de México', '5552452720', 'atencionzorro@asezor.com', 1),
+('Scorpion', 'Av. de los Cien Metros 795, 3er Piso, Gustavo A. Madero, Ciudad de México', '5557479300', NULL, 1),
+('Básicos Decasa', NULL, NULL, NULL, 1),
 ('Duero Mayoreo', NULL, NULL, NULL, 1),
 ('Garis', NULL, NULL, NULL, 1),
 ('Grupo Ibarra', NULL, NULL, NULL, 1),
 ('La Gran Bodega', NULL, NULL, NULL, 1),
-('M�s Bodega y Log�stica', NULL, NULL, NULL, 1),
+('Más Bodega y Logística', NULL, NULL, NULL, 1),
 ('Sahuayo Mayoreo', NULL, NULL, NULL, 1),
-('Surtace - Abastecedora Comercial Parral', 'Chihuahua, Chihuahua, M�xico', NULL, NULL, 1),
-('Mayoreo en L�nea', NULL, NULL, NULL, 1),
+('Surtace - Abastecedora Comercial Parral', 'Chihuahua, Chihuahua, México', NULL, NULL, 1),
+('Mayoreo en Línea', NULL, NULL, NULL, 1),
 ('Mayoreo Total', NULL, NULL, NULL, 1),
 ('Surtitienda', NULL, NULL, NULL, 1),
 ('All Serve Food Service', NULL, NULL, NULL, 1),
-('US Foods de M�xico', 'Los Cabos / Puerto Vallarta, M�xico', '526241462221', NULL, 1);
-go
+('US Foods de México', 'Los Cabos / Puerto Vallarta, México', '526241462221', NULL, 1);
+GO
+
 INSERT INTO Categorias (Nombre, Activo)
 VALUES
 ('Abarrotes', 1),
 ('Bebidas', 1),
-('L�cteos', 1),
+('Lácteos', 1),
 ('Carnes y embutidos', 1),
 ('Frutas y verduras', 1),
-('Panader�a y reposter�a', 1),
+('Panadería y repostería', 1),
 ('Limpieza del hogar', 1),
 ('Higiene personal', 1),
 ('Farmacia y salud', 1),
 ('Mascotas', 1),
-('Papeler�a', 1),
-('Ferreter�a', 1),
-('Electr�nica y accesorios', 1),
+('Papelería', 1),
+('Ferretería', 1),
+('Electrónica y accesorios', 1),
 ('Hogar y cocina', 1),
 ('Otros', 1);
-
-go
-
+GO
 
 INSERT INTO Marcas (Nombre, Activo)
 VALUES
@@ -79,8 +78,7 @@ VALUES
 ('Emperador', 1),
 ('Saladitas', 1),
 ('Maruchan', 1);
-
-go
+GO
 
 INSERT INTO UnidadesMedida (Nombre, Clave, PermiteDecimales, Activo)
 VALUES
@@ -95,8 +93,7 @@ VALUES
 ('Kilogramo', 'kg', 1, 1),
 ('Mililitro', 'ml', 1, 1),
 ('Litro', 'lt', 1, 1);
-
-go
+GO
 
 INSERT INTO Productos
 (
@@ -115,9 +112,9 @@ VALUES
 ('P0007','7UP 2 L','Refresco 7UP 2 litros',22.00,33.00,18,5,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,32,5),
 ('P0008','Manzanita Sol 400 ml','Refresco Manzanita Sol 400 ml',10.00,15.00,30,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,33,5),
 ('P0009','Manzanita Sol 2 L','Refresco Manzanita Sol 2 litros',23.00,34.00,18,5,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,33,5),
-('P0010','Jumex Mango 473 ml','N�ctar Jumex sabor mango',9.50,14.00,40,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,13,6),
+('P0010','Jumex Mango 473 ml','Néctar Jumex sabor mango',9.50,14.00,40,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,13,6),
 
-('P0011','Jumex Durazno 473 ml','N�ctar Jumex sabor durazno',9.50,14.00,40,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,13,6),
+('P0011','Jumex Durazno 473 ml','Néctar Jumex sabor durazno',9.50,14.00,40,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,13,6),
 ('P0012','Del Valle Manzana 1 L','Jugo Del Valle manzana 1 litro',18.00,27.00,24,6,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,14,11),
 ('P0013','Del Valle Naranja 1 L','Jugo Del Valle naranja 1 litro',18.00,27.00,24,6,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,14,11),
 ('P0014','Gatorade Naranja 1 L','Bebida deportiva Gatorade naranja',20.00,30.00,20,5,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,31,11),
@@ -130,7 +127,7 @@ VALUES
 ('P0020','Ritz original','Galletas Ritz original',13.00,19.00,40,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,27,3),
 
 ('P0021','Saladitas original','Galletas Saladitas original',11.00,17.00,40,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,39,3),
-('P0022','Gamesa Marias','Galletas Mar�as Gamesa',10.00,16.00,60,12,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,2,3),
+('P0022','Gamesa Marias','Galletas Marías Gamesa',10.00,16.00,60,12,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,2,3),
 ('P0023','Gamesa Crackers','Galletas saladas Gamesa crackers',11.00,17.00,45,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,2,3),
 ('P0024','Marinela Gansito','Pastelito Gansito Marinela',13.50,19.00,36,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,6,7,1),
 ('P0025','Marinela Submarinos','Pastelito Submarinos Marinela',12.50,18.00,36,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,6,7,1),
@@ -145,13 +142,13 @@ VALUES
 ('P0032','KitKat 4 fingers','Chocolate KitKat 4 fingers',13.00,19.00,55,12,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,25,1),
 ('P0033','Halls Menta','Caramelo Halls sabor menta',7.00,11.00,80,20,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,29,1),
 ('P0034','Halls Cereza','Caramelo Halls sabor cereza',7.00,11.00,80,20,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,29,1),
-('P0035','Trident Sand�a','Goma de mascar Trident sand�a',8.00,12.00,90,20,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,28,1),
+('P0035','Trident Sandía','Goma de mascar Trident sandía',8.00,12.00,90,20,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,28,1),
 
 ('P0036','Trident Hierbabuena','Goma de mascar Trident hierbabuena',8.00,12.00,90,20,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,28,1),
 ('P0037','Sabritas Original 45 g','Papas Sabritas original 45 g',11.00,17.00,60,15,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,4,4),
 ('P0038','Sabritas Adobadas 45 g','Papas Sabritas adobadas 45 g',11.00,17.00,60,15,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,4,4),
 ('P0039','Doritos Nacho 62 g','Botana Doritos Nacho',13.00,20.00,55,12,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,34,4),
-('P0040','Doritos Inc�gnita 62 g','Botana Doritos Inc�gnita',13.00,20.00,55,12,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,34,4),
+('P0040','Doritos Incógnita 62 g','Botana Doritos Incógnita',13.00,20.00,55,12,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,34,4),
 
 ('P0041','Cheetos Torciditos','Botana Cheetos Torciditos',12.00,18.00,55,12,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,35,4),
 ('P0042','Cheetos Flamin Hot','Botana Cheetos Flamin Hot',12.00,18.00,55,12,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,35,4),
@@ -160,14 +157,14 @@ VALUES
 ('P0045','Barcel Chips Fuego','Botana chips fuego Barcel',12.00,18.00,50,12,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,8,4),
 
 ('P0046','Barcel Takis Fuego','Botana Takis Fuego Barcel',13.00,20.00,65,15,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,8,4),
-('P0047','Maruchan vaso pollo','Sopa instant�nea Maruchan sabor pollo',14.00,20.00,60,15,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,40,1),
-('P0048','Maruchan vaso camar�n','Sopa instant�nea Maruchan sabor camar�n',14.00,20.00,60,15,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,40,1),
-('P0049','Maggi sopa pollo','Sopa instant�nea Maggi sabor pollo',11.00,17.00,45,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,23,1),
+('P0047','Maruchan vaso pollo','Sopa instantánea Maruchan sabor pollo',14.00,20.00,60,15,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,40,1),
+('P0048','Maruchan vaso camarón','Sopa instantánea Maruchan sabor camarón',14.00,20.00,60,15,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,40,1),
+('P0049','Maggi sopa pollo','Sopa instantánea Maggi sabor pollo',11.00,17.00,45,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,23,1),
 ('P0050','Maggi cubos pollo','Cubos sazonadores Maggi pollo',9.00,14.00,50,12,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,23,3),
 
-('P0051','La Coste�a frijoles negros','Frijoles negros refritos La Coste�a',16.00,23.00,36,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,9,6),
-('P0052','La Coste�a chiles jalape�os','Chiles jalape�os en escabeche',14.00,21.00,30,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,9,6),
-('P0053','La Coste�a rajas','Rajas jalape�o en lata',13.00,20.00,30,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,9,6),
+('P0051','La Costeña frijoles negros','Frijoles negros refritos La Costeña',16.00,23.00,36,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,9,6),
+('P0052','La Costeña chiles jalapeños','Chiles jalapeños en escabeche',14.00,21.00,30,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,9,6),
+('P0053','La Costeña rajas','Rajas jalapeño en lata',13.00,20.00,30,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,9,6),
 ('P0054','Herdez salsa verde','Salsa verde Herdez',15.00,22.00,36,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,10,6),
 ('P0055','Herdez salsa roja','Salsa roja Herdez',15.00,22.00,36,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,10,6),
 
@@ -181,11 +178,11 @@ VALUES
 ('P0062','La Moderna sopa letras','Pasta sopa letras La Moderna',7.00,12.00,70,15,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,12,3),
 ('P0063','Quaker avena 475 g','Avena Quaker 475 g',22.00,32.00,24,6,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,30,3),
 ('P0064','Quaker avena 1 kg','Avena Quaker 1 kg',39.00,54.00,18,4,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,30,4),
-('P0065','Nescaf� Cl�sico 120 g','Caf� soluble Nescaf� cl�sico',58.00,79.00,18,4,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,20,1),
+('P0065','Nescafé Clásico 120 g','Café soluble Nescafé clásico',58.00,79.00,18,4,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,20,1),
 
-('P0066','Nescaf� Cl�sico 200 g','Caf� soluble Nescaf� cl�sico 200 g',89.00,119.00,12,3,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,20,1),
-('P0067','Nestl� Corn Flakes','Cereal hojuelas de ma�z',46.00,62.00,20,5,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,19,3),
-('P0068','Nestl� Chocapic','Cereal Chocapic Nestl�',49.00,66.00,20,5,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,19,3),
+('P0066','Nescafé Clásico 200 g','Café soluble Nescafé clásico 200 g',89.00,119.00,12,3,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,20,1),
+('P0067','Nestlé Corn Flakes','Cereal hojuelas de maíz',46.00,62.00,20,5,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,19,3),
+('P0068','Nestlé Chocapic','Cereal Chocapic Nestlé',49.00,66.00,20,5,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,19,3),
 ('P0069','Nido Kinder 360 g','Leche en polvo Nido Kinder',78.00,102.00,16,4,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,3,21,1),
 ('P0070','La Lechera lata','Leche condensada La Lechera',24.00,34.00,24,6,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,3,22,6),
 
@@ -199,12 +196,12 @@ VALUES
 ('P0077','Santa Clara vainilla 1 L','Leche sabor vainilla Santa Clara',24.00,35.00,18,4,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,3,18,11),
 ('P0078','Lala yogur bebible fresa','Yogur bebible Lala fresa',11.00,17.00,30,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,3,15,5),
 ('P0079','Alpura yogur natural','Yogur natural Alpura',14.00,20.00,24,6,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,3,16,5),
-('P0080','Nestl� media crema','Media crema Nestl�',17.00,24.00,24,6,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,3,19,6),
+('P0080','Nestlé media crema','Media crema Nestlé',17.00,24.00,24,6,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,3,19,6),
 
 ('P0081','Bimbo tortillas harina','Tortillas de harina Bimbo',26.00,36.00,18,4,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,6,6,3),
 ('P0082','Gamesa Canelitas','Galletas Gamesa Canelitas',12.00,18.00,40,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,2,3),
 ('P0083','Gamesa Emperador combinado','Galletas Gamesa Emperador combinado',12.50,18.50,40,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,2,3),
-('P0084','Marinela Ping�inos','Pastelito Ping�inos Marinela',13.50,19.00,30,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,6,7,1),
+('P0084','Marinela Pingüinos','Pastelito Pingüinos Marinela',13.50,19.00,30,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,6,7,1),
 ('P0085','Barcel Runners','Botana Barcel Runners',11.00,17.00,45,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,8,4),
 
 ('P0086','Sabritas Receta Crujiente','Papas Sabritas receta crujiente',12.00,18.00,40,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,4,4),
@@ -213,19 +210,18 @@ VALUES
 ('P0089','Tostitos Habanero','Botana Tostitos habanero',14.00,21.00,40,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,36,4),
 ('P0090','Quaker barras avena','Barras de avena Quaker',18.00,26.00,30,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,30,3),
 
-('P0091','La Coste�a pur� tomate','Pur� de tomate La Coste�a',13.00,19.00,30,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,9,6),
-('P0092','Herdez mole do�a Mar�a','Mole Do�a Mar�a Herdez',36.00,49.00,16,4,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,10,6),
+('P0091','La Costeña puré tomate','Puré de tomate La Costeña',13.00,19.00,30,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,9,6),
+('P0092','Herdez mole doña María','Mole Doña María Herdez',36.00,49.00,16,4,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,10,6),
 ('P0093','Verde Valle garbanzo','Garbanzo Verde Valle 500 g',18.00,26.00,24,6,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,11,4),
 ('P0094','La Moderna fideo','Fideo La Moderna 200 g',7.00,12.00,60,15,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,12,3),
-('P0095','Nescaf� Decaf 120 g','Caf� soluble descafeinado',60.00,82.00,12,3,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,20,1),
+('P0095','Nescafé Decaf 120 g','Café soluble descafeinado',60.00,82.00,12,3,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,1,20,1),
 
-('P0096','Coca-Cola sin az�car 600 ml','Refresco Coca-Cola sin az�car 600 ml',12.50,18.00,36,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,1,5),
+('P0096','Coca-Cola sin azúcar 600 ml','Refresco Coca-Cola sin azúcar 600 ml',12.50,18.00,36,10,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,1,5),
 ('P0097','Pepsi Black 600 ml','Refresco Pepsi Black 600 ml',10.50,15.50,30,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,5,5),
-('P0098','Jumex Guayaba 473 ml','N�ctar Jumex sabor guayaba',9.50,14.00,30,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,13,6),
+('P0098','Jumex Guayaba 473 ml','Néctar Jumex sabor guayaba',9.50,14.00,30,8,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,13,6),
 ('P0099','Del Valle Mango 1 L','Jugo Del Valle mango 1 litro',18.00,27.00,20,5,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,14,11),
-('P0100','Gatorade Lima Lim�n 1 L','Bebida deportiva Gatorade lima lim�n',20.00,30.00,20,5,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,31,11);
-
-go
+('P0100','Gatorade Lima Limón 1 L','Bebida deportiva Gatorade lima limón',20.00,30.00,20,5,SYSDATETIME(),NULL,NULL,1,NULL,NULL,1,2,31,11);
+GO
 
 INSERT INTO ProductoProveedores (IdProducto, IdProveedor)
 SELECT p.Id, v.Id
@@ -292,6 +288,4 @@ SELECT p.Id, v.Id
 FROM Productos p
 JOIN Proveedores v ON v.Id IN (6,7,14)
 WHERE p.Codigo BETWEEN 'P0081' AND 'P0095';
-
-go
-
+GO
