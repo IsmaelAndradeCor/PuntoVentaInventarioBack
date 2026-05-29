@@ -166,5 +166,28 @@ namespace PuntoVentaInventario.Controllers
                 return StatusCode(500, $"Error al registrar la venta: {ex.Message}");
             }
         }
+        
+        [HttpGet("obtener-metodos-pago")]
+        public async Task<IActionResult> ObtenerMetodosPago()
+        {
+            try
+            {
+                var metodosPago = await _context.MetodosPago
+                    .Select(m => new MetodosPagoResponseDto
+                    {
+                        Id = m.Id,
+                        Nombre = m.Nombre,
+                        Activo = m.Activo,
+                        AfectaCaja = m.AfectaCaja
+                    })
+                    .ToListAsync();
+
+                return Ok(metodosPago);
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest( new {mensaje = "Ocurrió un error al obtener los metodos de pago: " + ex});
+            }
+        }
     }
 }
