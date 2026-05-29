@@ -4,7 +4,7 @@
     {
         public int IdProveedor { get; set; }
         public decimal Monto { get; set; }
-        public string MetodoPago { get; set; } = string.Empty;
+        public int IdMetodoPago { get; set; }
         public string? Referencia { get; set; }
         public string? Observaciones { get; set; }
     }

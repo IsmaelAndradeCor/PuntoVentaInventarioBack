@@ -11,7 +11,8 @@ namespace PuntoVentaInventario.Migrations
             migrationBuilder.Sql("""
 CREATE OR ALTER PROCEDURE [dbo].[sp_RegistrarVenta]
     @IdUsuario NVARCHAR(450),
-    @Detalle NVARCHAR(MAX)
+    @Detalle NVARCHAR(MAX),
+    @MetodoPago NVARCHAR(50)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -179,7 +180,7 @@ BEGIN
             0,
             @Total,
             @IdUsuario,
-            'Efectivo'
+            @MetodoPago
         );
 
         DECLARE @IdVenta INT = SCOPE_IDENTITY();

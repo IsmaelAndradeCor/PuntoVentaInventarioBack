@@ -1,4 +1,3 @@
-DELETE FROM Marcas;
 
 INSERT INTO Marcas (Nombre, Activo)
 VALUES
@@ -10,7 +9,7 @@ VALUES
 ('Bimbo', 1),
 ('Marinela', 1),
 ('Barcel', 1),
-('La Costeña', 1),
+('La Costeï¿½a', 1),
 ('Herdez', 1),
 ('Verde Valle', 1),
 ('La Moderna', 1),
@@ -20,8 +19,8 @@ VALUES
 ('Alpura', 1),
 ('Nutrileche', 1),
 ('Santa Clara', 1),
-('Nestlé', 1),
-('Nescafé', 1),
+('Nestlï¿½', 1),
+('Nescafï¿½', 1),
 ('Nido', 1),
 ('La Lechera', 1),
 ('Maggi', 1),

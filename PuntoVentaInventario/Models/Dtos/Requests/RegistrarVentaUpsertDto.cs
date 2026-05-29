@@ -7,6 +7,7 @@ namespace PuntoVentaInventario.Models.Dtos.Requests
         [Required]
         [MinLength(1)]
         public List<RegistrarVentaDetalleUpsertDto> Detalles { get; set; } = new();
+        public int IdMetodoPago { get; set; }
     }
 
     public class RegistrarVentaDetalleUpsertDto

@@ -311,6 +311,19 @@ namespace PuntoVentaInventario.Controllers
                 command.CommandText = "sp_RegistrarPagoProveedor";
                 command.CommandType = CommandType.StoredProcedure;
 
+                var metodoPago = await _context.MetodosPago
+                    .Where(m => m.Id == request.IdMetodoPago && m.Activo)
+                    .Select(m => new MetodosPagoResponseDto
+                    {
+                        Id = m.Id,
+                        Nombre = m.Nombre,
+                        Activo = m.Activo,
+                        AfectaCaja = m.AfectaCaja
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (metodoPago == null) return NotFound(new {mensaje = "Metodo de pago inactivo."});
+
                 command.Parameters.Add(new SqlParameter("@IdProveedor", SqlDbType.Int)
                 {
                     Value = request.IdProveedor
@@ -325,7 +338,7 @@ namespace PuntoVentaInventario.Controllers
 
                 command.Parameters.Add(new SqlParameter("@MetodoPago", SqlDbType.NVarChar, 50)
                 {
-                    Value = request.MetodoPago
+                    Value = metodoPago.Nombre
                 });
 
                 command.Parameters.Add(new SqlParameter("@Referencia", SqlDbType.NVarChar, 100)
