@@ -72,6 +72,12 @@ namespace PuntoVentaInventario.Authorization
                 },
                 new()
                 {
+                    Key = "cortecaja",
+                    Titulo = "Corte Caja",
+                    Permission = Permissions.CorteCaja.Ver
+                },
+                new()
+                {
                     Key = "productos",
                     Titulo = "Productos",
                     Permission = Permissions.Productos.Ver,

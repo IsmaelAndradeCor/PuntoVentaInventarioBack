@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using PuntoVentaInventario.Authorization;
 using PuntoVentaInventario.Data;
 using PuntoVentaInventario.Models.Dtos.Requests;
 using PuntoVentaInventario.Models.Dtos.Responses;
@@ -112,6 +113,43 @@ namespace PuntoVentaInventario.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"Error al registrar la apertura de caja: {ex.Message}");
+            }
+        }
+
+        [Authorize(Policy = Permissions.CorteCaja.Ver)]
+        [HttpGet("obtener_corte_hoy")]
+        public async Task<ActionResult<CorteCajaHoyResponseDto>> ObtenerCorteCajaHoy()
+        {
+            try
+            {
+                var connection = _context.Database.GetDbConnection();
+
+                if (connection.State != ConnectionState.Open)
+                    await connection.OpenAsync();
+
+                await using var command = connection.CreateCommand();
+                command.CommandText = "sp_ObtenerCorteCajaHoy";
+                command.CommandType = CommandType.StoredProcedure;
+
+                await using var reader = await command.ExecuteReaderAsync();
+
+                if (!await reader.ReadAsync())
+                    return StatusCode(500, "No se recibió respuesta al obtener el corte de caja.");
+
+                var response = new CorteCajaHoyResponseDto
+                {
+                    FechaOperacion = reader.GetDateTime(reader.GetOrdinal("FechaOperacion")),
+                    MontoInicialCaja = reader.GetDecimal(reader.GetOrdinal("MontoInicialCaja")),
+                    MontoVentas = reader.GetDecimal(reader.GetOrdinal("MontoVentas")),
+                    MontoPagoProveedores = reader.GetDecimal(reader.GetOrdinal("MontoPagoProveedores")),
+                    CorteCaja = reader.GetDecimal(reader.GetOrdinal("CorteCaja"))
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al obtener el corte de caja: {ex.Message}");
             }
         }
     }

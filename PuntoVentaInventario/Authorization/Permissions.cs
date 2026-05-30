@@ -33,6 +33,11 @@
             public const string Actualizar = "usuarios.permisos.actualizar";
         }
 
+        public static class CorteCaja
+        {
+            public const string Ver = "cortecaja.ver";
+        }
+
         public static class Ventas
         {
             public const string Ver = "ventas.ver";
@@ -137,6 +142,8 @@
 
             PermisosUsuario.Ver,
             PermisosUsuario.Actualizar,
+
+            CorteCaja.Ver,
 
             Ventas.Ver,
             Ventas.Realizar,

@@ -120,6 +120,19 @@ namespace PuntoVentaInventario.Controllers
                         cantidad = d.Cantidad
                     }));
 
+                var metodoPago = await _context.MetodosPago
+                    .Where(m => m.Id == request.IdMetodoPago && m.Activo)
+                    .Select(m => new MetodosPagoResponseDto
+                    {
+                        Id = m.Id,
+                        Nombre = m.Nombre,
+                        Activo = m.Activo,
+                        AfectaCaja = m.AfectaCaja
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (metodoPago == null) return NotFound(new { mensaje = "Metodo de pago inactivo." });
+
                 command.Parameters.Add(new SqlParameter("@IdUsuario", SqlDbType.NVarChar, 450)
                 {
                     Value = userIdClaim
@@ -128,6 +141,11 @@ namespace PuntoVentaInventario.Controllers
                 command.Parameters.Add(new SqlParameter("@Detalle", SqlDbType.NVarChar)
                 {
                     Value = detalleJson
+                });
+
+                command.Parameters.Add(new SqlParameter("@MetodoPago", SqlDbType.NVarChar, 50)
+                {
+                    Value = metodoPago.Nombre
                 });
 
                 await using var reader = await command.ExecuteReaderAsync();
