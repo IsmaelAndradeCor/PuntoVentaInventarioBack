@@ -35,7 +35,7 @@ namespace PuntoVentaInventario.Models.Entities
         [Column(TypeName = "decimal(18,2)")]
         public decimal PrecioTotal { get; set; }
 
-        public virtual Venta Venta { get; set; } = null!;
-        public virtual Producto Producto { get; set; } = null!;
+        public Venta Venta { get; set; } = null!;
+        public Producto Producto { get; set; } = null!;
     }
 }

@@ -1,7 +1,7 @@
 CREATE OR ALTER PROCEDURE [dbo].[sp_RegistrarPagoProveedor]
     @IdProveedor INT,
     @Monto DECIMAL(18,2),
-    @MetodoPago NVARCHAR(50),
+    @IdMetodoPago INT,
     @Referencia NVARCHAR(100) = NULL,
     @Observaciones NVARCHAR(500) = NULL,
     @IdUsuario NVARCHAR(450)
@@ -19,7 +19,7 @@ BEGIN
         IF @Monto IS NULL OR @Monto <= 0
             THROW 50102, 'El monto debe ser mayor a 0.', 1;
 
-        IF @MetodoPago IS NULL OR LTRIM(RTRIM(@MetodoPago)) = ''
+        IF @IdMetodoPago IS NULL OR @IdMetodoPago = 0
             THROW 50103, 'El método de pago es obligatorio.', 1;
 
         IF @IdUsuario IS NULL OR LTRIM(RTRIM(@IdUsuario)) = ''
@@ -72,7 +72,7 @@ BEGIN
             Folio,
             IdProveedor,
             Monto,
-            MetodoPago,
+            IdMetodoPago,
             Referencia,
             Observaciones,
             FechaPago,
@@ -84,7 +84,7 @@ BEGIN
             @Folio,
             @IdProveedor,
             @Monto,
-            LTRIM(RTRIM(@MetodoPago)),
+            @IdMetodoPago,
             NULLIF(LTRIM(RTRIM(@Referencia)), ''),
             NULLIF(LTRIM(RTRIM(@Observaciones)), ''),
             GETDATE(),

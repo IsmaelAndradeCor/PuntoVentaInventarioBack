@@ -1,7 +1,7 @@
 CREATE OR ALTER PROCEDURE [dbo].[sp_RegistrarVenta]
     @IdUsuario NVARCHAR(450),
     @Detalle NVARCHAR(MAX),
-    @MetodoPago NVARCHAR(50)
+    @IdMetodoPago INT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -102,6 +102,9 @@ BEGIN
         IF @SiguienteNumero IS NULL
             THROW 50009, 'No se pudo generar el consecutivo del folio.', 1;
 
+        IF @IdMetodoPago IS NULL OR @IdMetodoPago = 0
+            THROW 50011, 'El método de pago es obligatorio.', 1;
+
         SET @Folio =
             'VTA-' +
             CONVERT(CHAR(8), @Hoy, 112) +
@@ -159,7 +162,7 @@ BEGIN
             Descuento,
             Total,
             IdUsuario,
-            FormaPago
+            IdMetodoPago
         )
         VALUES
         (
@@ -169,7 +172,7 @@ BEGIN
             0,
             @Total,
             @IdUsuario,
-            @MetodoPago
+            @IdMetodoPago
         );
 
         DECLARE @IdVenta INT = SCOPE_IDENTITY();

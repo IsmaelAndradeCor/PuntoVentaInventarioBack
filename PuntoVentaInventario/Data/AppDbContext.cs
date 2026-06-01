@@ -37,6 +37,12 @@ namespace PuntoVentaInventario.Data
                 .HasIndex(v => v.Folio)
                 .IsUnique();
 
+            modelBuilder.Entity<Venta>()
+                .HasOne(v => v.MetodoPago)
+                .WithMany()
+                .HasForeignKey(v => v.IdMetodoPago)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<DetalleVenta>()
                 .HasOne(d => d.Venta)
                 .WithMany(v => v.Detalles)
@@ -154,9 +160,10 @@ namespace PuntoVentaInventario.Data
                 entity.Property(e => e.Monto)
                     .HasColumnType("decimal(18,2)");
 
-                entity.Property(e => e.MetodoPago)
-                    .HasMaxLength(50)
-                    .IsRequired();
+                entity.HasOne(e => e.MetodoPago)
+                    .WithMany()
+                    .HasForeignKey(e => e.IdMetodoPago)
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 entity.Property(e => e.Referencia)
                     .HasMaxLength(100);

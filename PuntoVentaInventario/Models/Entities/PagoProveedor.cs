@@ -20,8 +20,11 @@ namespace PuntoVentaInventario.Models.Entities
         [Column(TypeName = "decimal(18,2)")]
         public decimal Monto { get; set; }
 
-        [Required, MaxLength(50)]
-        public string MetodoPago { get; set; } = "Efectivo";
+        [Required]
+        public int IdMetodoPago { get; set; }
+
+        [ForeignKey(nameof(IdMetodoPago))]
+        public MetodoPago MetodoPago { get; set; } = null!;
 
         [MaxLength(100)]
         public string? Referencia { get; set; }

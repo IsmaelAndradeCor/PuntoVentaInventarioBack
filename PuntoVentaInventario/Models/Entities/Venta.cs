@@ -24,9 +24,12 @@ namespace PuntoVentaInventario.Models.Entities
         [Required, MaxLength(450)]
         public string IdUsuario { get; set; } = string.Empty;
 
-        [Required, MaxLength(20)]
-        public string FormaPago { get; set; } = "Efectivo";
+        [Required]
+        public int IdMetodoPago { get; set; }
 
-        public virtual ICollection<DetalleVenta> Detalles { get; set; } = new List<DetalleVenta>();
+        [ForeignKey(nameof(IdMetodoPago))]
+        public MetodoPago MetodoPago { get; set; } = null!;
+
+        public ICollection<DetalleVenta> Detalles { get; set; } = new List<DetalleVenta>();
     }
 }

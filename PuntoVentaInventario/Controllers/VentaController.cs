@@ -23,7 +23,7 @@ namespace PuntoVentaInventario.Controllers
             _context = context;
         }
 
-        //[Authorize(Policy = Permissions.Ventas.HistorialVer)]
+        [Authorize(Policy = Permissions.Ventas.HistorialVer)]
         [HttpGet("generar_ventas")]
         public async Task<IActionResult> GetGenerarVentas([FromQuery] GenerarVentasRequestDto request)
         {
@@ -48,7 +48,8 @@ namespace PuntoVentaInventario.Controllers
                             CostoTotal = v.Detalles.Sum(d => (decimal?)d.CostoTotal) ?? 0,
                             Total = v.Total,
                             Ganancias = v.Total - (v.Detalles.Sum(d => (decimal?)d.CostoTotal) ?? 0),
-                            FormaPago = v.FormaPago,
+                            IdMetodoPago = v.IdMetodoPago,
+                            MetodoPago = v.MetodoPago.Nombre,
                             Detalles = v.Detalles.Select(d => new GenerarVentaDetalleResponseDto
                             {
                                 IdDetalleVenta = d.Id,
@@ -79,7 +80,8 @@ namespace PuntoVentaInventario.Controllers
                         CostoTotal = v.Detalles.Sum(d => (decimal?)d.CostoTotal) ?? 0,
                         Total = v.Total,
                         Ganancias = v.Total - (v.Detalles.Sum(d => (decimal?)d.CostoTotal) ?? 0),
-                        FormaPago = v.FormaPago,
+                        IdMetodoPago = v.IdMetodoPago,
+                        MetodoPago = v.MetodoPago.Nombre,
                         Detalles = new List<GenerarVentaDetalleResponseDto>()
                     })
                     .OrderByDescending(v => v.FechaVenta)
@@ -143,9 +145,9 @@ namespace PuntoVentaInventario.Controllers
                     Value = detalleJson
                 });
 
-                command.Parameters.Add(new SqlParameter("@MetodoPago", SqlDbType.NVarChar, 50)
+                command.Parameters.Add(new SqlParameter("@IdMetodoPago", SqlDbType.Int)
                 {
-                    Value = metodoPago.Nombre
+                    Value = metodoPago.Id
                 });
 
                 await using var reader = await command.ExecuteReaderAsync();
@@ -172,7 +174,8 @@ namespace PuntoVentaInventario.Controllers
                 ex.Number == 50007 ||
                 ex.Number == 50008 ||
                 ex.Number == 50009 ||
-                ex.Number == 50010)
+                ex.Number == 50010 ||
+                ex.Number == 50011)
             {
                 return Conflict(new
                 {

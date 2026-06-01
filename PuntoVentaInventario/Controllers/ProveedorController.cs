@@ -336,9 +336,9 @@ namespace PuntoVentaInventario.Controllers
                     Value = request.Monto
                 });
 
-                command.Parameters.Add(new SqlParameter("@MetodoPago", SqlDbType.NVarChar, 50)
+                command.Parameters.Add(new SqlParameter("@IdMetodoPago", SqlDbType.Int)
                 {
-                    Value = metodoPago.Nombre
+                    Value = metodoPago.Id
                 });
 
                 command.Parameters.Add(new SqlParameter("@Referencia", SqlDbType.NVarChar, 100)
@@ -412,7 +412,8 @@ namespace PuntoVentaInventario.Controllers
                         Folio = p.Folio,
                         NombreProveedor = p.Proveedor.Nombre,
                         Monto = p.Monto,
-                        MetodoPago = p.MetodoPago,
+                        IdMetodoPago = p.IdMetodoPago,
+                        MetodoPago = p.MetodoPago.Nombre,
                         Referencia = p.Referencia ?? "",
                         Observaciones = p.Observaciones ?? "",
                         FechaPago = p.FechaPago

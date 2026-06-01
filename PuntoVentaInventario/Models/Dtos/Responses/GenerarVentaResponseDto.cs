@@ -10,7 +10,8 @@
         public decimal CostoTotal { get; set; }
         public decimal Total { get; set; }
         public decimal Ganancias { get; set; }
-        public string FormaPago { get; set; } = string.Empty;
+        public int IdMetodoPago { get; set; }
+        public string MetodoPago { get; set; } = string.Empty;
         public List<GenerarVentaDetalleResponseDto> Detalles { get; set; } = new();
     }
 }
