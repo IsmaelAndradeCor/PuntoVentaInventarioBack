@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-public class ProductoUpsertDto
+namespace PuntoVentaInventario.Models.Dtos.Requests
+{
+    public class ProductoUpsertDto
 {
         [Required(ErrorMessage = "El Código es obligatorio.")]
     [StringLength(20, ErrorMessage = "Máximo 20 caracteres para el Código.")]
@@ -38,4 +40,5 @@ public class ProductoUpsertDto
 
         [MinLength(1, ErrorMessage = "Debe seleccionar al menos un Proveedor.")]
     public List<int> IdsProveedores { get; set; } = new();
+    }
 }

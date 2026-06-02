@@ -1,6 +1,6 @@
-﻿using PuntoVentaInventario.Models.Dtos.Responses;
-
-public class ProductoSimpleResponseDto
+﻿namespace PuntoVentaInventario.Models.Dtos.Responses
+{
+    public class ProductoSimpleResponseDto
 {
     public int Id { get; set; }
     public string Codigo { get; set; } = string.Empty;
@@ -9,5 +9,5 @@ public class ProductoSimpleResponseDto
     public decimal Precio { get; set; }
     public decimal Stock { get; set; }
     public UnidadMedidaResponseDto? UnidadMedida { get; set; }
-
+    }
 }

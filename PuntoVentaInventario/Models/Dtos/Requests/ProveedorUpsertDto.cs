@@ -16,7 +16,7 @@ namespace PuntoVentaInventario.Models.Dtos.Requests
         public string? Telefono { get; set; }
 
         [StringLength(100, ErrorMessage = "Máximo 100 caracteres para el correo del proveedor.")]
-        //[EmailAddress(ErrorMessage = "El correo del proveedor no tiene un formato válido.")]
+        [EmailAddress(ErrorMessage = "El correo del proveedor no tiene un formato válido.")]
         public string? Correo { get; set; }
     }
 }

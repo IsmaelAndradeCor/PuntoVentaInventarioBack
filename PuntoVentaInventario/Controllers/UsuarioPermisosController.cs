@@ -16,10 +16,12 @@ namespace PuntoVentaInventario.Controllers
     public class UsuarioPermisosController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<UsuarioPermisosController> _logger;
 
-        public UsuarioPermisosController(UserManager<ApplicationUser> userManager)
+        public UsuarioPermisosController(UserManager<ApplicationUser> userManager, ILogger<UsuarioPermisosController> logger)
         {
             _userManager = userManager;
+            _logger = logger;
         }
         [Authorize(Policy = Permissions.PermisosUsuario.Ver)]
         [HttpGet("permisos/catalogo")]
@@ -79,7 +81,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { mensaje = $"Error al asignar permiso: {ex.Message}" });
+                _logger.LogError(ex, "Error al asignar permiso");
+                return StatusCode(500, new { mensaje = "Error interno al asignar permiso." });
             }
         }
 
@@ -127,7 +130,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { mensaje = $"Error al quitar permiso: {ex.Message}" });
+                _logger.LogError(ex, "Error al quitar permiso");
+                return StatusCode(500, new { mensaje = "Error interno al quitar permiso." });
             }
         }
     }

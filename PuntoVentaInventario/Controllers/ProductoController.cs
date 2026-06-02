@@ -2,9 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+
 using PuntoVentaInventario.Authorization;
 using PuntoVentaInventario.Data;
+using PuntoVentaInventario.Models.Dtos.Requests;
 using PuntoVentaInventario.Models.Dtos.Responses;
 using PuntoVentaInventario.Models.Entities;
 using System.Data;
@@ -16,12 +17,12 @@ namespace PuntoVentaInventario.Controllers
     [Route("api/[controller]")]
     public class ProductoController : ControllerBase
     {
-        private readonly IConfiguration _config;
         private readonly AppDbContext _context;
-        public ProductoController(IConfiguration config, AppDbContext context)
+        private readonly ILogger<ProductoController> _logger;
+        public ProductoController(AppDbContext context, ILogger<ProductoController> logger)
         {
-            _config = config;
-            _context = context;  // ← Inyecta
+            _context = context;
+            _logger = logger;
         }
 
         // Obtiene todos los productos activos
@@ -78,7 +79,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener productos: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener productos activos");
+                return StatusCode(500, new { mensaje = "Error interno al obtener productos." });
             }
         }
 
@@ -136,7 +138,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener productos: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener productos para venta");
+                return StatusCode(500, new { mensaje = "Error interno al obtener productos." });
             }
         }
 
@@ -194,7 +197,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener productos: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener productos inactivos");
+                return StatusCode(500, new { mensaje = "Error interno al obtener productos." });
             }
         }
 
@@ -256,6 +260,7 @@ namespace PuntoVentaInventario.Controllers
             return Ok(producto);
         }
 
+        [Authorize(Policy = Permissions.Home.StockMinimoVer)]
         [HttpGet("stock_minimo")]
         public async Task<IActionResult> GetProductosStockMinimo()
         {
@@ -315,7 +320,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener productos: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener productos con stock mínimo");
+                return StatusCode(500, new { mensaje = "Error interno al obtener productos." });
             }
             //try
             //{

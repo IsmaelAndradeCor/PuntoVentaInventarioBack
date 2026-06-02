@@ -21,6 +21,7 @@ namespace PuntoVentaInventario.Data
         public DbSet<Folio> Folios { get; set; }
         public DbSet<MetodoPago> MetodosPago { get; set; }
         public DbSet<AperturaCaja> AperturasCaja { get; set; }
+        public DbSet<CorteCaja> CortesCaja { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -224,8 +225,72 @@ namespace PuntoVentaInventario.Data
                     .HasMaxLength(450)
                     .IsRequired();
 
-                entity.HasIndex(e => e.FechaOperacion)
-                    .IsUnique();
+                entity.HasIndex(e => new { e.FechaOperacion, e.Activo });
+
+                entity.HasMany<CorteCaja>()
+                    .WithOne(c => c.AperturaCaja)
+                    .HasForeignKey(c => c.IdAperturaCaja)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<CorteCaja>(entity =>
+            {
+                entity.ToTable("CortesCaja");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.FechaCorte)
+                    .HasColumnType("datetime2")
+                    .IsRequired();
+
+                entity.Property(e => e.MontoInicial)
+                    .HasColumnType("decimal(18,2)")
+                    .IsRequired();
+
+                entity.Property(e => e.MontoVentasEfectivo)
+                    .HasColumnType("decimal(18,2)")
+                    .IsRequired();
+
+                entity.Property(e => e.MontoPagoProveedores)
+                    .HasColumnType("decimal(18,2)")
+                    .IsRequired();
+
+                entity.Property(e => e.MontoEsperado)
+                    .HasColumnType("decimal(18,2)")
+                    .IsRequired();
+
+                entity.Property(e => e.Retiro)
+                    .HasColumnType("decimal(18,2)")
+                    .IsRequired();
+
+                entity.Property(e => e.MontoFinal)
+                    .HasColumnType("decimal(18,2)")
+                    .IsRequired();
+
+                entity.Property(e => e.IdUsuarioPrevio)
+                    .HasMaxLength(450)
+                    .IsRequired();
+
+                entity.Property(e => e.NombreUsuarioPrevio)
+                    .HasMaxLength(200)
+                    .IsRequired();
+
+                entity.Property(e => e.IdUsuarioCorte)
+                    .HasMaxLength(450)
+                    .IsRequired();
+
+                entity.Property(e => e.NombreUsuarioCorte)
+                    .HasMaxLength(200)
+                    .IsRequired();
+
+                entity.Property(e => e.IdUsuarioRecepcion)
+                    .HasMaxLength(450);
+
+                entity.Property(e => e.NombreUsuarioRecepcion)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.Observaciones)
+                    .HasMaxLength(500);
             });
         }
     }

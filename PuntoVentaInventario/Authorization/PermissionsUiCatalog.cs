@@ -12,7 +12,16 @@ namespace PuntoVentaInventario.Authorization
                 {
                     Key = "home",
                     Titulo = "Inicio",
-                    Permission = Permissions.Home.Ver
+                    Permission = Permissions.Home.Ver,
+                    Hijos =
+                    [
+                        new()
+                        {
+                            Key = Permissions.Home.StockMinimoVer,
+                            Titulo = "Stock Minimo",
+                            Permission = Permissions.Home.StockMinimoVer                        
+                        }
+                    ]
                 },
                 new()
                 {
@@ -74,7 +83,11 @@ namespace PuntoVentaInventario.Authorization
                 {
                     Key = "cortecaja",
                     Titulo = "Corte Caja",
-                    Permission = Permissions.CorteCaja.Ver
+                    Permission = Permissions.CorteCaja.Ver,
+                    Hijos =
+                    [
+                        new() { Key = Permissions.CorteCaja.Realizar, Titulo = "Realizar corte", Permission = Permissions.CorteCaja.Realizar }
+                    ]
                 },
                 new()
                 {

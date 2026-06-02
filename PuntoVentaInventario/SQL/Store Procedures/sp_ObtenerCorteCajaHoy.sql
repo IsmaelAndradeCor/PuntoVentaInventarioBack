@@ -21,14 +21,14 @@ BEGIN
     FROM dbo.Ventas
     WHERE FechaVenta >= @Hoy
       AND FechaVenta < @Manana
-      AND FormaPago = 'Efectivo';
+      AND IdMetodoPago = 1;
 
     SELECT
         @MontoPagoProveedores = ISNULL(SUM(Monto), 0)
     FROM dbo.PagosProveedores
     WHERE FechaPago >= @Hoy
       AND FechaPago < @Manana
-      AND MetodoPago = 'Caja'
+      AND IdMetodoPago = 4
       AND Activo = 1;
 
     SELECT

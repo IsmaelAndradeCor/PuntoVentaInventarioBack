@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -18,20 +17,17 @@ namespace PuntoVentaInventario.Controllers
     public class ProveedorController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ILogger<ProveedorController> _logger;
 
-        public ProveedorController(AppDbContext context) { 
+        public ProveedorController(AppDbContext context, ILogger<ProveedorController> logger) { 
          _context = context;
+         _logger = logger;
         }
 
         [Authorize(Policy = Permissions.Proveedores.ActivosVer)]
         [HttpGet("listar_proveedores_activos")]
         public async Task<IActionResult> GetProveedoresActivos() 
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrWhiteSpace(userIdClaim))
-                return Unauthorized("No se pudo obtener el usuario autenticado.");
-
             try
             {
                 var proveedores = await _context.Proveedores
@@ -50,7 +46,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener proveedores: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener proveedores activos");
+                return StatusCode(500, new { mensaje = "Error interno al obtener proveedores." });
             }
         }
 
@@ -58,11 +55,6 @@ namespace PuntoVentaInventario.Controllers
         [HttpGet("listar_proveedores_inactivos")]
         public async Task<IActionResult> GetProveedoresInactivos()
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrWhiteSpace(userIdClaim))
-                return Unauthorized("No se pudo obtener el usuario autenticado.");
-
             try
             {
                 var proveedores = await _context.Proveedores
@@ -81,7 +73,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener proveedores: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener proveedores inactivos");
+                return StatusCode(500, new { mensaje = "Error interno al obtener proveedores." });
             }
         }
 
@@ -89,11 +82,6 @@ namespace PuntoVentaInventario.Controllers
         [HttpGet("obtener_proveedor/{id:int}")]
         public async Task<IActionResult> GetProveedorPorId(int id)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrWhiteSpace(userIdClaim))
-                return Unauthorized("No se pudo obtener el usuario autenticado.");
-
             try
             {
                 var proveedor = await _context.Proveedores
@@ -116,7 +104,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener el proveedor: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener el proveedor por ID");
+                return StatusCode(500, new { mensaje = "Error interno al obtener el proveedor." });
             }
         }
 
@@ -142,14 +131,7 @@ namespace PuntoVentaInventario.Controllers
                     return BadRequest(new { mensaje = "Ya existe un proveedor con ese nombre, por favor revisa que no esté inactivo" });
                 }
 
-                var proveedor = new Proveedor
-                {
-                    Nombre = nombreNormalizado,
-                    Contacto = dto.Contacto,
-                    Telefono = dto.Telefono,
-                    Correo = dto.Correo,
-                    Activo = true
-                };
+                var proveedor = new Proveedor();
 
                 proveedor.Nombre = dto.Nombre.Trim();
                 proveedor.Contacto = string.IsNullOrWhiteSpace(dto.Contacto) ? null : dto.Contacto.Trim();
@@ -172,7 +154,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al crear el proveedor: {ex.Message}");
+                _logger.LogError(ex, "Error al crear el proveedor");
+                return StatusCode(500, new { mensaje = "Error interno al crear el proveedor." });
             }
         }
 
@@ -223,7 +206,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al actualizar el Proveedor: {ex.Message}");
+                _logger.LogError(ex, "Error al actualizar el proveedor");
+                return StatusCode(500, new { mensaje = "Error interno al actualizar el proveedor." });
             }
         }
 
@@ -252,7 +236,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al eliminar al Proveedor: {ex.Message}");
+                _logger.LogError(ex, "Error al activar el proveedor");
+                return StatusCode(500, new { mensaje = "Error interno al activar el proveedor." });
             }
         }
 
@@ -287,7 +272,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al eliminar al Proveedor: {ex.Message}");
+                _logger.LogError(ex, "Error al desactivar el proveedor");
+                return StatusCode(500, new { mensaje = "Error interno al desactivar el proveedor." });
             }
         }
 
@@ -390,7 +376,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al registrar el pago al proveedor: {ex.Message}");
+                _logger.LogError(ex, "Error al registrar el pago al proveedor");
+                return StatusCode(500, new { mensaje = "Error interno al registrar el pago al proveedor." });
             }
         }
 
@@ -398,11 +385,6 @@ namespace PuntoVentaInventario.Controllers
         [HttpGet("listar_pagos_proveedores")]
         public async Task<IActionResult> GetPagosProveedores()
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrWhiteSpace(userIdClaim))
-                return Unauthorized("No se pudo obtener el usuario autenticado.");
-
             try
             {
                 var pagoProveedores = await _context.PagosProveedores
@@ -423,7 +405,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener los pagos a proveedores: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener los pagos a proveedores");
+                return StatusCode(500, new { mensaje = "Error interno al obtener los pagos a proveedores." });
             }
         }
     }

@@ -17,10 +17,12 @@ namespace PuntoVentaInventario.Controllers
     public class VentaController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ILogger<VentaController> _logger;
 
-        public VentaController(AppDbContext context)
+        public VentaController(AppDbContext context, ILogger<VentaController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [Authorize(Policy = Permissions.Ventas.HistorialVer)]
@@ -91,7 +93,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al generar ventas: {ex.Message}");
+                _logger.LogError(ex, "Error al generar ventas");
+                return StatusCode(500, new { mensaje = "Error interno al generar ventas." });
             }
         }
 
@@ -106,6 +109,25 @@ namespace PuntoVentaInventario.Controllers
 
             try
             {
+                var aperturaActiva = await _context.AperturasCaja
+                    .Where(a => a.Activo)
+                    .FirstOrDefaultAsync();
+
+                if (aperturaActiva == null)
+                    return BadRequest(new
+                    {
+                        mensaje = "No hay un turno de caja activo. Debes abrir caja antes de realizar una venta.",
+                        codigo = "SIN_CAJA_ACTIVA"
+                    });
+
+                if (aperturaActiva.IdUsuario != userIdClaim)
+                    return BadRequest(new
+                    {
+                        mensaje = "La caja está asignada a otro usuario. Solo el portador de la caja puede realizar ventas.",
+                        codigo = "CAJA_ASIGNADA_OTRO_USUARIO",
+                        idUsuarioActivo = aperturaActiva.IdUsuario
+                    });
+
                 var connection = _context.Database.GetDbConnection();
 
                 if (connection.State != ConnectionState.Open)
@@ -184,10 +206,12 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al registrar la venta: {ex.Message}");
+                _logger.LogError(ex, "Error al registrar la venta");
+                return StatusCode(500, new { mensaje = "Error interno al registrar la venta." });
             }
         }
         
+        [Authorize(Policy = Permissions.Ventas.Realizar)]
         [HttpGet("obtener-metodos-pago")]
         public async Task<IActionResult> ObtenerMetodosPago()
         {
@@ -205,9 +229,10 @@ namespace PuntoVentaInventario.Controllers
 
                 return Ok(metodosPago);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                return BadRequest( new {mensaje = "Ocurrió un error al obtener los metodos de pago: " + ex});
+                _logger.LogError(ex, "Error al obtener los métodos de pago");
+                return StatusCode(500, new { mensaje = "Error interno al obtener los métodos de pago." });
             }
         }
     }

@@ -15,10 +15,12 @@ namespace PuntoVentaInventario.Controllers
     public class MarcaController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ILogger<MarcaController> _logger;
 
-        public MarcaController(AppDbContext context)
+        public MarcaController(AppDbContext context, ILogger<MarcaController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [Authorize(Policy = Permissions.Marcas.ActivosVer)]
@@ -41,7 +43,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener marcas: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener marcas activas");
+                return StatusCode(500, new { mensaje = "Error interno al obtener marcas." });
             }
         }
 
@@ -65,7 +68,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener marcas: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener marcas inactivas");
+                return StatusCode(500, new { mensaje = "Error interno al obtener marcas." });
             }
         }
 
@@ -92,7 +96,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener la marca: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener la marca por ID");
+                return StatusCode(500, new { mensaje = "Error interno al obtener la marca." });
             }
         }
 
@@ -132,7 +137,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al crear la marca: {ex.Message}");
+                _logger.LogError(ex, "Error al crear la marca");
+                return StatusCode(500, new { mensaje = "Error interno al crear la marca." });
             }
         }
 
@@ -173,7 +179,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al actualizar la marca: {ex.Message}");
+                _logger.LogError(ex, "Error al actualizar la marca");
+                return StatusCode(500, new { mensaje = "Error interno al actualizar la marca." });
             }
         }
 
@@ -190,7 +197,7 @@ namespace PuntoVentaInventario.Controllers
                     return NotFound(new { mensaje = "Marca no encontrada" });
 
                 if (marca.Activo == true)
-                    return NotFound(new { mensaje = "Marca ya activa" });
+                    return BadRequest(new { mensaje = "Marca ya activa" });
 
                 marca.Activo = true;
 
@@ -199,7 +206,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al eliminar la marca: {ex.Message}");
+                _logger.LogError(ex, "Error al activar la marca");
+                return StatusCode(500, new { mensaje = "Error interno al activar la marca." });
             }
         }
 
@@ -232,7 +240,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al desactivar la marca: {ex.Message}");
+                _logger.LogError(ex, "Error al desactivar la marca");
+                return StatusCode(500, new { mensaje = "Error interno al desactivar la marca." });
             }
         }
     }

@@ -15,15 +15,14 @@ BEGIN
         IF @IdUsuario IS NULL OR LTRIM(RTRIM(@IdUsuario)) = ''
             THROW 50202, 'El usuario es obligatorio.', 1;
 
-        DECLARE @Hoy DATE = CAST(GETDATE() AS DATE);
-
         IF EXISTS (
             SELECT 1
             FROM dbo.AperturasCaja WITH (UPDLOCK, HOLDLOCK)
-            WHERE FechaOperacion = @Hoy
-                AND Activo = 1
+            WHERE Activo = 1
         )
-            THROW 50203, 'La apertura de caja del día ya fue registrada.', 1;
+            THROW 50203, 'Ya existe un turno de caja activo. Debe realizar el corte antes de abrir uno nuevo.', 1;
+
+        DECLARE @Hoy DATE = CAST(GETDATE() AS DATE);
 
         INSERT INTO dbo.AperturasCaja
         (

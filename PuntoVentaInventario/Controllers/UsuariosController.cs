@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PuntoVentaInventario.Authorization;
+using PuntoVentaInventario.Data;
 using PuntoVentaInventario.Models.Dtos.Requests;
 using PuntoVentaInventario.Models.Dtos.Responses;
 using PuntoVentaInventario.Models.Entities;
+using System.Security.Claims;
 
 namespace PuntoVentaInventario.Controllers
 {
@@ -16,13 +18,19 @@ namespace PuntoVentaInventario.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly AppDbContext _context;
+        private readonly ILogger<UsuariosController> _logger;
 
         public UsuariosController(
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            AppDbContext context,
+            ILogger<UsuariosController> logger)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _context = context;
+            _logger = logger;
         }
 
         [Authorize(Policy = Permissions.Usuarios.ActivosVer)]
@@ -31,44 +39,12 @@ namespace PuntoVentaInventario.Controllers
         {
             try
             {
-                var usuarios = await _userManager.Users
-                    .Where(u => u.Activo)
-                    .OrderBy(u => u.UserName)
-                    .ToListAsync();
-
-                var response = new List<UsuarioPermisosResponseDto>();
-
-                foreach (var user in usuarios)
-                {
-                    var roles = await _userManager.GetRolesAsync(user);
-                    var claims = await _userManager.GetClaimsAsync(user);
-
-                    var permissions = claims
-                        .Where(c => c.Type == "permission")
-                        .Select(c => c.Value)
-                        .Distinct()
-                        .OrderBy(p => p)
-                        .ToList();
-
-                    response.Add(new UsuarioPermisosResponseDto
-                    {
-                        Id = user.Id,
-                        UserName = user.UserName ?? string.Empty,
-                        NombreCompleto = user.NombreCompleto,
-                        Activo = user.Activo,
-                        Roles = roles,
-                        Permissions = permissions
-                    });
-                }
-
-                return Ok(response);
+                return Ok(await ObtenerUsuariosAsync(u => u.Activo));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
-                {
-                    mensaje = $"Error al obtener el catálogo de usuarios: {ex.Message}"
-                });
+                _logger.LogError(ex, "Error al obtener usuarios activos");
+                return StatusCode(500, new { mensaje = "Error interno al obtener el catálogo de usuarios." });
             }
         }
 
@@ -78,45 +54,52 @@ namespace PuntoVentaInventario.Controllers
         {
             try
             {
-                var usuarios = await _userManager.Users
-                    .Where(u => u.Activo!)
-                    .OrderBy(u => u.UserName)
-                    .ToListAsync();
-
-                var response = new List<UsuarioPermisosResponseDto>();
-
-                foreach (var user in usuarios)
-                {
-                    var roles = await _userManager.GetRolesAsync(user);
-                    var claims = await _userManager.GetClaimsAsync(user);
-
-                    var permissions = claims
-                        .Where(c => c.Type == "permission")
-                        .Select(c => c.Value)
-                        .Distinct()
-                        .OrderBy(p => p)
-                        .ToList();
-
-                    response.Add(new UsuarioPermisosResponseDto
-                    {
-                        Id = user.Id,
-                        UserName = user.UserName ?? string.Empty,
-                        NombreCompleto = user.NombreCompleto,
-                        Activo = user.Activo,
-                        Roles = roles,
-                        Permissions = permissions
-                    });
-                }
-
-                return Ok(response);
+                return Ok(await ObtenerUsuariosAsync(u => !u.Activo));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
-                {
-                    mensaje = $"Error al obtener el catálogo de usuarios: {ex.Message}"
-                });
+                _logger.LogError(ex, "Error al obtener usuarios inactivos");
+                return StatusCode(500, new { mensaje = "Error interno al obtener el catálogo de usuarios." });
             }
+        }
+
+        private async Task<List<UsuarioPermisosResponseDto>> ObtenerUsuariosAsync(System.Linq.Expressions.Expression<Func<ApplicationUser, bool>> filtro)
+        {
+            var usuarios = await _userManager.Users
+                .Where(filtro)
+                .OrderBy(u => u.UserName)
+                .ToListAsync();
+
+            var userIds = usuarios.Select(u => u.Id).ToHashSet();
+
+            var rolesDict = await _context.Roles
+                .Where(r => _context.UserRoles.Any(ur => ur.RoleId == r.Id && userIds.Contains(ur.UserId)))
+                .SelectMany(r => _context.UserRoles.Where(ur => ur.RoleId == r.Id && userIds.Contains(ur.UserId))
+                    .Select(ur => new { ur.UserId, RoleName = r.Name! }))
+                .ToListAsync();
+
+            var rolesPorUsuario = rolesDict
+                .GroupBy(r => r.UserId)
+                .ToDictionary(g => g.Key, g => g.Select(r => r.RoleName).ToList());
+
+            var claims = await _context.UserClaims
+                .Where(c => c.ClaimType == "permission" && userIds.Contains(c.UserId))
+                .Select(c => new { c.UserId, c.ClaimValue })
+                .ToListAsync();
+
+            var claimsPorUsuario = claims
+                .GroupBy(c => c.UserId)
+                .ToDictionary(g => g.Key, g => g.Select(c => c.ClaimValue!).Distinct().OrderBy(x => x).ToList());
+
+            return usuarios.Select(user => new UsuarioPermisosResponseDto
+            {
+                Id = user.Id,
+                UserName = user.UserName ?? string.Empty,
+                NombreCompleto = user.NombreCompleto,
+                Activo = user.Activo,
+                Roles = rolesPorUsuario.GetValueOrDefault(user.Id, new List<string>()),
+                Permissions = claimsPorUsuario.GetValueOrDefault(user.Id, new List<string>())
+            }).ToList();
         }
 
         [Authorize(Policy = Permissions.Usuarios.Actualizar)]
@@ -154,16 +137,14 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
-                {
-                    mensaje = $"Error al obtener el usuario: {ex.Message}"
-                });
+                _logger.LogError(ex, "Error al obtener el usuario {UserId}", id);
+                return StatusCode(500, new { mensaje = "Error interno al obtener el usuario." });
             }
         }
 
         [Authorize(Policy = Permissions.Usuarios.Crear)]
         [HttpPost]
-        public async Task<IActionResult> Crearsuario([FromBody] CrearUsuarioUpsertDto dto)
+        public async Task<IActionResult> CrearUsuario([FromBody] CrearUsuarioUpsertDto dto)
         {
             try
             {
@@ -226,10 +207,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
-                {
-                    mensaje = $"Error al crear el usuario: {ex.Message}"
-                });
+                _logger.LogError(ex, "Error al crear el usuario");
+                return StatusCode(500, new { mensaje = "Error interno al crear el usuario." });
             }
         }
 
@@ -269,10 +248,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
-                {
-                    mensaje = $"Error al actualizar el nombre completo: {ex.Message}"
-                });
+                _logger.LogError(ex, "Error al actualizar el nombre completo del usuario {UserId}", id);
+                return StatusCode(500, new { mensaje = "Error interno al actualizar el nombre completo." });
             }
         }
 
@@ -340,10 +317,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
-                {
-                    mensaje = $"Error al cambiar el rol: {ex.Message}"
-                });
+                _logger.LogError(ex, "Error al cambiar el rol del usuario {UserId}", id);
+                return StatusCode(500, new { mensaje = "Error interno al cambiar el rol." });
             }
         }
 
@@ -381,10 +356,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
-                {
-                    mensaje = $"Error al cambiar la contraseña: {ex.Message}"
-                });
+                _logger.LogError(ex, "Error al cambiar la contraseña del usuario {UserId}", id);
+                return StatusCode(500, new { mensaje = "Error interno al cambiar la contraseña." });
             }
         }
 
@@ -424,7 +397,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { mensaje = $"Error al activar usuario: {ex.Message}" });
+                _logger.LogError(ex, "Error al activar usuario {UserId}", id);
+                return StatusCode(500, new { mensaje = "Error interno al activar usuario." });
             }
         }
 
@@ -472,7 +446,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { mensaje = $"Error al desactivar usuario: {ex.Message}" });
+                _logger.LogError(ex, "Error al desactivar usuario {UserId}", id);
+                return StatusCode(500, new { mensaje = "Error interno al desactivar usuario." });
             }
         }
     }

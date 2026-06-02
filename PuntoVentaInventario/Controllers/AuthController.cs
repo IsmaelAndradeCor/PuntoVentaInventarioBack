@@ -16,13 +16,16 @@ namespace PuntoVentaInventario.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<AuthController> _logger;
 
         public AuthController(
             UserManager<ApplicationUser> userManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ILogger<AuthController> logger)
         {
             _userManager = userManager;
             _configuration = configuration;
+            _logger = logger;
         }
 
         [HttpPost("login")]
@@ -90,7 +93,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { mensaje = $"Error al iniciar sesión: {ex.Message}" });
+                _logger.LogError(ex, "Error al iniciar sesión");
+                return StatusCode(500, new { mensaje = "Error interno al iniciar sesión." });
             }
         }
     }

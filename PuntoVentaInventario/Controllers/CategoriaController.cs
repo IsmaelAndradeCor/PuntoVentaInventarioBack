@@ -15,10 +15,12 @@ namespace PuntoVentaInventario.Controllers
     public class CategoriaController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ILogger<CategoriaController> _logger;
 
-        public CategoriaController(AppDbContext context)
+        public CategoriaController(AppDbContext context, ILogger<CategoriaController> logger)
         {
             _context = context;
+            _logger = logger;
         }
         [Authorize(Policy = Permissions.Categorias.ActivosVer)]
         [HttpGet("listar_categorias_activas")]
@@ -40,7 +42,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener categorias: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener categorías activas");
+                return StatusCode(500, new { mensaje = "Error interno al obtener categorías." });
             }
         }
 
@@ -64,13 +67,14 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener categorias: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener categorías inactivas");
+                return StatusCode(500, new { mensaje = "Error interno al obtener categorías." });
             }
         }
 
         [Authorize(Policy = Permissions.Categorias.Ver)]
         [HttpGet("obtener_categoria/{id:int}")]
-        public async Task<IActionResult> GetCategorisPorId(int id)
+        public async Task<IActionResult> GetCategoriasPorId(int id)
         {
             try
             {
@@ -91,7 +95,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener la marca: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener la categoría por ID");
+                return StatusCode(500, new { mensaje = "Error interno al obtener la categoría." });
             }
         }
 
@@ -127,11 +132,12 @@ namespace PuntoVentaInventario.Controllers
                     Nombre = categoria.Nombre
                 };
 
-                return CreatedAtAction(nameof(GetCategorisPorId), new { id = categoria.Id }, response);
+                return CreatedAtAction(nameof(GetCategoriasPorId), new { id = categoria.Id }, response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al crear la categoria: {ex.Message}");
+                _logger.LogError(ex, "Error al crear la categoría");
+                return StatusCode(500, new { mensaje = "Error interno al crear la categoría." });
             }
         }
 
@@ -172,7 +178,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al actualizar la categoria: {ex.Message}");
+                _logger.LogError(ex, "Error al actualizar la categoría");
+                return StatusCode(500, new { mensaje = "Error interno al actualizar la categoría." });
             }
         }
 
@@ -199,7 +206,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al activar la categoria: {ex.Message}");
+                _logger.LogError(ex, "Error al activar la categoría");
+                return StatusCode(500, new { mensaje = "Error interno al activar la categoría." });
             }
         }
 
@@ -232,7 +240,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al desactivar la categoria: {ex.Message}");
+                _logger.LogError(ex, "Error al desactivar la categoría");
+                return StatusCode(500, new { mensaje = "Error interno al desactivar la categoría." });
             }
         }
     }

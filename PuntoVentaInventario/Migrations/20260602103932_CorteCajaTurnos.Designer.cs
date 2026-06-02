@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PuntoVentaInventario.Data;
 
@@ -11,9 +12,11 @@ using PuntoVentaInventario.Data;
 namespace PuntoVentaInventario.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260602103932_CorteCajaTurnos")]
+    partial class CorteCajaTurnos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -297,17 +300,8 @@ namespace PuntoVentaInventario.Migrations
                     b.Property<int>("IdAperturaCaja")
                         .HasColumnType("int");
 
-                    b.Property<string>("IdUsuarioCorte")
+                    b.Property<string>("IdUsuario")
                         .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("IdUsuarioPrevio")
-                        .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("IdUsuarioRecepcion")
                         .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
@@ -325,20 +319,6 @@ namespace PuntoVentaInventario.Migrations
 
                     b.Property<decimal>("MontoVentasEfectivo")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("NombreUsuarioCorte")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("NombreUsuarioPrevio")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("NombreUsuarioRecepcion")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Observaciones")
                         .HasMaxLength(500)

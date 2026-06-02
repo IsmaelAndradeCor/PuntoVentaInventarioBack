@@ -15,10 +15,12 @@ namespace PuntoVentaInventario.Controllers
     public class UnidadMedidaController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ILogger<UnidadMedidaController> _logger;
 
-        public UnidadMedidaController(AppDbContext context)
+        public UnidadMedidaController(AppDbContext context, ILogger<UnidadMedidaController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [Authorize(Policy = Permissions.UnidadesMedida.ActivosVer)]
@@ -42,7 +44,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener las unidades de medida: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener unidades de medida activas");
+                return StatusCode(500, new { mensaje = "Error interno al obtener las unidades de medida." });
             }
         }
 
@@ -67,7 +70,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener las unidades de medida: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener unidades de medida inactivas");
+                return StatusCode(500, new { mensaje = "Error interno al obtener las unidades de medida." });
             }
         }
 
@@ -96,7 +100,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al obtener la unidad de medida: {ex.Message}");
+                _logger.LogError(ex, "Error al obtener la unidad de medida por ID");
+                return StatusCode(500, new { mensaje = "Error interno al obtener la unidad de medida." });
             }
         }
 
@@ -140,7 +145,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al crear la unidad de medida: {ex.Message}");
+                _logger.LogError(ex, "Error al crear la unidad de medida");
+                return StatusCode(500, new { mensaje = "Error interno al crear la unidad de medida." });
             }
         }
 
@@ -185,7 +191,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al actualizar la unidad de medida: {ex.Message}");
+                _logger.LogError(ex, "Error al actualizar la unidad de medida");
+                return StatusCode(500, new { mensaje = "Error interno al actualizar la unidad de medida." });
             }
         }
 
@@ -209,7 +216,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al eliminar la Unidad de Medida: {ex.Message}");
+                _logger.LogError(ex, "Error al activar la unidad de medida");
+                return StatusCode(500, new { mensaje = "Error interno al activar la unidad de medida." });
             }
         }
 
@@ -239,7 +247,8 @@ namespace PuntoVentaInventario.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al eliminar la Unidad de Medida: {ex.Message}");
+                _logger.LogError(ex, "Error al desactivar la unidad de medida");
+                return StatusCode(500, new { mensaje = "Error interno al desactivar la unidad de medida." });
             }
         }
     }

@@ -8,10 +8,10 @@ namespace PuntoVentaInventario.Models.Entities
         [Key]
         public int Id { get; set; }
 
-        [ForeignKey("Venta")]
+        [ForeignKey(nameof(Venta))]
         public int IdVenta { get; set; }
 
-        [ForeignKey("Producto")]
+        [ForeignKey(nameof(Producto))]
         public int IdProducto { get; set; }
 
         [Required, MaxLength(20)]

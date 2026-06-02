@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using PuntoVentaInventario.Authorization;
 using PuntoVentaInventario.Models.Entities;
 using System.Security.Claims;
@@ -11,6 +12,7 @@ namespace PuntoVentaInventario.Data
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
             string[] roles = { "Administrador", "Empleado" };
 
@@ -22,8 +24,10 @@ namespace PuntoVentaInventario.Data
                 }
             }
 
-            var adminUserName = "admin";
-            var adminPassword = "Admin123*";
+            var adminUserName = configuration["Seed:AdminUserName"] ?? "admin";
+            var adminPassword = configuration["Seed:AdminPassword"] ?? "Admin123*";
+            var empleadoUserName = configuration["Seed:EmpleadoUserName"] ?? "empleado";
+            var empleadoPassword = configuration["Seed:EmpleadoPassword"] ?? "Empleado123*";
 
             var admin = await userManager.FindByNameAsync(adminUserName);
 
@@ -44,12 +48,8 @@ namespace PuntoVentaInventario.Data
                 }
 
                 await userManager.AddToRoleAsync(admin, "Administrador");
+                await EnsurePermissionsAsync(userManager, admin, Permissions.All);
             }
-
-            await EnsurePermissionsAsync(userManager, admin, Permissions.All);
-
-            var empleadoUserName = "empleado";
-            var empleadoPassword = "Empleado123*";
 
             var empleado = await userManager.FindByNameAsync(empleadoUserName);
 
@@ -70,13 +70,12 @@ namespace PuntoVentaInventario.Data
                 }
 
                 await userManager.AddToRoleAsync(empleado, "Empleado");
+                await EnsurePermissionsAsync(userManager, empleado, new[]
+                {
+                    Permissions.Home.Ver,
+                    Permissions.Ventas.Realizar
+                });
             }
-
-            await EnsurePermissionsAsync(userManager, empleado, new[]
-            {
-                Permissions.Home.Ver,
-                Permissions.Ventas.Realizar
-            });
         }
 
         private static async Task EnsurePermissionsAsync(

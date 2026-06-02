@@ -7,6 +7,7 @@ namespace PuntoVentaInventario.Models.Dtos.Requests
         [Required]
         [MinLength(1)]
         public List<RegistrarVentaDetalleUpsertDto> Detalles { get; set; } = new();
+        [Range(1, int.MaxValue, ErrorMessage = "El método de pago es obligatorio.")]
         public int IdMetodoPago { get; set; }
     }
 

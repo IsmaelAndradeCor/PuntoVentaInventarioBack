@@ -5,6 +5,7 @@
         public static class Home
         {
             public const string Ver = "home.ver";
+            public const string StockMinimoVer = "home.stockminimo.ver";
         }
 
         public static class Configuracion
@@ -36,6 +37,7 @@
         public static class CorteCaja
         {
             public const string Ver = "cortecaja.ver";
+            public const string Realizar = "cortecaja.realizar";
         }
 
         public static class Ventas
@@ -129,6 +131,7 @@
         public static List<string> All => new()
         {
             Home.Ver,
+            Home.StockMinimoVer,
 
             Configuracion.Ver,
 
@@ -144,6 +147,7 @@
             PermisosUsuario.Actualizar,
 
             CorteCaja.Ver,
+            CorteCaja.Realizar,
 
             Ventas.Ver,
             Ventas.Realizar,

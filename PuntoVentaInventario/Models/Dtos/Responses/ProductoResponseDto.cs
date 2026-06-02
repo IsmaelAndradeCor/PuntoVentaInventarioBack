@@ -1,6 +1,6 @@
-﻿using PuntoVentaInventario.Models.Dtos.Responses;
-
-public class ProductoResponseDto
+﻿namespace PuntoVentaInventario.Models.Dtos.Responses
+{
+    public class ProductoResponseDto
 {
     public int Id { get; set; }
     public string Codigo { get; set; } = string.Empty;
@@ -18,4 +18,5 @@ public class ProductoResponseDto
     public UnidadMedidaResponseDto? UnidadMedida { get; set; }
 
     public List<ProveedorResponseDto> Proveedores { get; set; } = new();
+    }
 }
