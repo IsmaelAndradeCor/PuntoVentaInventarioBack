@@ -228,14 +228,56 @@ namespace PuntoVentaInventario.Controllers
 
                     var ventas = await _context.Ventas
                         .Where(v => v.FechaVenta >= inicioTurno && v.FechaVenta <= c.FechaCorte && v.IdMetodoPago == MetodoPagoConstants.Efectivo)
-                        .Select(v => new CorteDetalleVentaDto
+                        .Select(v => new GenerarVentaResponseDto
                         {
                             IdVenta = v.Id,
                             Folio = v.Folio,
                             FechaVenta = v.FechaVenta,
-                            Total = v.Total
+                            Subtotal = v.Subtotal,
+                            Descuento = v.Descuento,
+                            CostoTotal = v.Detalles.Sum(d => (decimal?)d.CostoTotal) ?? 0,
+                            Total = v.Total,
+                            Ganancias = v.Total - (v.Detalles.Sum(d => (decimal?)d.CostoTotal) ?? 0),
+                            IdMetodoPago = v.IdMetodoPago,
+                            MetodoPago = v.MetodoPago.Nombre,
+                            Detalles = new List<GenerarVentaDetalleResponseDto>()
                         })
                         .ToListAsync();
+
+                    var ventasIds = ventas.Select(v => v.IdVenta).ToList();
+
+                    if (ventasIds.Count > 0)
+                    {
+                        var detallesAgrupados = await _context.DetalleVentas
+                            .Where(d => ventasIds.Contains(d.IdVenta))
+                            .GroupBy(d => d.IdVenta)
+                            .Select(g => new
+                            {
+                                IdVenta = g.Key,
+                                Detalles = g.Select(d => new GenerarVentaDetalleResponseDto
+                                {
+                                    IdDetalleVenta = d.Id,
+                                    IdProducto = d.IdProducto,
+                                    CodigoProducto = d.CodigoProducto,
+                                    NombreProducto = d.NombreProducto,
+                                    Cantidad = d.Cantidad,
+                                    CostoUnitario = d.CostoUnitario,
+                                    CostoTotal = d.CostoTotal,
+                                    PrecioUnitario = d.PrecioUnitario,
+                                    PrecioTotal = d.PrecioTotal
+                                }).ToList()
+                            })
+                            .ToListAsync();
+
+                        foreach (var grupo in detallesAgrupados)
+                        {
+                            var venta = ventas.FirstOrDefault(v => v.IdVenta == grupo.IdVenta);
+                            if (venta != null)
+                            {
+                                venta.Detalles = grupo.Detalles;
+                            }
+                        }
+                    }
 
                     var pagos = await _context.PagosProveedores
                         .Where(p => p.FechaPago >= inicioTurno && p.FechaPago <= c.FechaCorte && p.IdMetodoPago == MetodoPagoConstants.Caja && p.Activo)

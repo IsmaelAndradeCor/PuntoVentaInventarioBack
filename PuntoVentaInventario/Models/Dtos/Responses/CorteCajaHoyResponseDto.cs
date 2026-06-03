@@ -35,17 +35,18 @@
         public bool CorteFinal { get; set; }
         public string? Observaciones { get; set; }
 
-        public List<CorteDetalleVentaDto> Ventas { get; set; } = new();
+        public List<GenerarVentaResponseDto> Ventas { get; set; } = new();
         public List<CorteDetallePagoDto> PagosProveedores { get; set; } = new();
     }
 
-    public class CorteDetalleVentaDto
-    {
-        public int IdVenta { get; set; }
-        public string Folio { get; set; } = string.Empty;
-        public DateTime FechaVenta { get; set; }
-        public decimal Total { get; set; }
-    }
+    //public class CorteDetalleVentaDto
+    //{
+    //    public int IdVenta { get; set; }
+    //    public string Folio { get; set; } = string.Empty;
+    //    public DateTime FechaVenta { get; set; }
+    //    public decimal Total { get; set; }
+    //    public List<GenerarVentaDetalleResponseDto> Detalles { get; set; } = new();
+    //}
 
     public class CorteDetallePagoDto
     {
