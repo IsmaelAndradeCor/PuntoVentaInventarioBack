@@ -39,7 +39,7 @@ namespace PuntoVentaInventario.Models.Entities
         public int? IdUnidadMedida { get; set; }
         public UnidadMedida? UnidadMedida { get; set; }
 
-        public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
+        public DateTime FechaCreacion { get; set; } = DateTime.Now;
         public DateTime? FechaModificacion { get; set; }
         public DateTime? FechaEliminacion { get; set; }
         [Required, MaxLength(450)]

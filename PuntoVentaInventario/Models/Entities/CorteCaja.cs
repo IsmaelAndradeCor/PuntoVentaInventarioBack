@@ -15,7 +15,7 @@ namespace PuntoVentaInventario.Models.Entities
         public AperturaCaja AperturaCaja { get; set; } = null!;
 
         [Required]
-        public DateTime FechaCorte { get; set; } = DateTime.UtcNow;
+        public DateTime FechaCorte { get; set; } = DateTime.Now;
 
         [Required]
         [Column(TypeName = "decimal(18,2)")]

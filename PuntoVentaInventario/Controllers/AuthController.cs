@@ -70,7 +70,7 @@ namespace PuntoVentaInventario.Controllers
 
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-                var expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["Jwt:ExpiresInMinutes"]));
+                var expires = DateTime.Now.AddMinutes(Convert.ToDouble(_configuration["Jwt:ExpiresInMinutes"]));
 
                 var token = new JwtSecurityToken(
                     issuer: _configuration["Jwt:Issuer"],

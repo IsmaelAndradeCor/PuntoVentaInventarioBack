@@ -11,7 +11,7 @@ namespace PuntoVentaInventario.Models.Entities
         [Required, MaxLength(20)]
         public string Folio { get; set; } = string.Empty;
 
-        public DateTime FechaVenta { get; set; } = DateTime.UtcNow;
+        public DateTime FechaVenta { get; set; } = DateTime.Now;
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal Subtotal { get; set; }

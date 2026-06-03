@@ -33,7 +33,7 @@ namespace PuntoVentaInventario.Models.Entities
         public string? Observaciones { get; set; }
 
         [Required]
-        public DateTime FechaPago { get; set; } = DateTime.UtcNow;
+        public DateTime FechaPago { get; set; } = DateTime.Now;
 
         [Required, MaxLength(450)]
         public string IdUsuario { get; set; } = string.Empty;

@@ -15,7 +15,7 @@ namespace PuntoVentaInventario.Models.Entities
         public decimal MontoInicial { get; set; }
 
         [Required]
-        public DateTime FechaRegistro { get; set; } = DateTime.UtcNow;
+        public DateTime FechaRegistro { get; set; } = DateTime.Now;
 
         [Required, MaxLength(450)]
         public string IdUsuario { get; set; } = string.Empty;

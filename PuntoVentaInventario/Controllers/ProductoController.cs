@@ -368,7 +368,7 @@ namespace PuntoVentaInventario.Controllers
                 IdCategoria = dto.IdCategoria,
                 IdMarca = dto.IdMarca,
                 IdUnidadMedida = dto.IdUnidadMedida,
-                FechaCreacion = DateTime.UtcNow,
+                FechaCreacion = DateTime.Now,
                 IdUsuarioCreacion = userIdClaim,
                 Activo = true
             };
@@ -427,7 +427,7 @@ namespace PuntoVentaInventario.Controllers
             producto.IdCategoria = dto.IdCategoria;
             producto.IdMarca = dto.IdMarca;
             producto.IdUnidadMedida = dto.IdUnidadMedida;
-            producto.FechaModificacion = DateTime.UtcNow;
+            producto.FechaModificacion = DateTime.Now;
             producto.IdUsuarioModificacion = userIdClaim;
 
             var proveedoresNuevos = dto.IdsProveedores?.Distinct().ToHashSet() ?? new HashSet<int>();
@@ -526,7 +526,7 @@ namespace PuntoVentaInventario.Controllers
             producto.Activo = true;
             producto.FechaEliminacion = null;
             producto.IdUsuarioEliminacion = null;
-            producto.FechaModificacion = DateTime.UtcNow;
+            producto.FechaModificacion = DateTime.Now;
             producto.IdUsuarioModificacion = userIdClaim;
 
             await _context.SaveChangesAsync();
@@ -550,7 +550,7 @@ namespace PuntoVentaInventario.Controllers
 
             // Soft delete: solo marca como inactivo
             producto.Activo = false;
-            producto.FechaEliminacion = DateTime.UtcNow;
+            producto.FechaEliminacion = DateTime.Now;
             producto.IdUsuarioEliminacion = userIdClaim;  // Usuario logueado
 
             await _context.SaveChangesAsync();
