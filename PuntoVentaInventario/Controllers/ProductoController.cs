@@ -268,7 +268,7 @@ namespace PuntoVentaInventario.Controllers
             {
                 var productos = await _context.Productos
                     .Where(m => m.Activo && m.Stock <= m.StockMinimo)
-                    .OrderBy(m => m.Nombre)
+                    .OrderBy(m => m.Stock)
                     .Select(m => new ProductoResponseDto
                     {
                         Id = m.Id,

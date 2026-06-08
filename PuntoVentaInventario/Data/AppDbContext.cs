@@ -22,6 +22,8 @@ namespace PuntoVentaInventario.Data
         public DbSet<MetodoPago> MetodosPago { get; set; }
         public DbSet<AperturaCaja> AperturasCaja { get; set; }
         public DbSet<CorteCaja> CortesCaja { get; set; }
+        public DbSet<Merma> Mermas { get; set; }
+        public DbSet<DetalleMerma> DetalleMermas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -291,6 +293,72 @@ namespace PuntoVentaInventario.Data
 
                 entity.Property(e => e.Observaciones)
                     .HasMaxLength(500);
+            });
+
+            modelBuilder.Entity<Merma>(entity =>
+            {
+                entity.ToTable("Mermas");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Folio)
+                    .HasMaxLength(20)
+                    .IsRequired();
+
+                entity.Property(e => e.FechaMerma)
+                    .HasColumnType("datetime2")
+                    .IsRequired();
+
+                entity.Property(e => e.CostoTotal)
+                    .HasColumnType("decimal(18,2)")
+                    .IsRequired();
+
+                entity.Property(e => e.Observaciones)
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.IdUsuario)
+                    .HasMaxLength(450)
+                    .IsRequired();
+
+                entity.HasIndex(e => e.Folio)
+                    .IsUnique();
+            });
+
+            modelBuilder.Entity<DetalleMerma>(entity =>
+            {
+                entity.ToTable("DetalleMermas");
+
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.CodigoProducto)
+                    .HasMaxLength(20)
+                    .IsRequired();
+
+                entity.Property(e => e.NombreProducto)
+                    .HasMaxLength(100)
+                    .IsRequired();
+
+                entity.Property(e => e.Cantidad)
+                    .HasColumnType("decimal(18,3)")
+                    .IsRequired();
+
+                entity.Property(e => e.CostoUnitario)
+                    .HasColumnType("decimal(18,2)")
+                    .IsRequired();
+
+                entity.Property(e => e.CostoTotal)
+                    .HasColumnType("decimal(18,2)")
+                    .IsRequired();
+
+                entity.HasOne(e => e.Merma)
+                    .WithMany(m => m.Detalles)
+                    .HasForeignKey(e => e.IdMerma)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Producto)
+                    .WithMany()
+                    .HasForeignKey(e => e.IdProducto)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }
