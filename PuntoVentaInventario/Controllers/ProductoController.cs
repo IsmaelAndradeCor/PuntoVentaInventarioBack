@@ -28,13 +28,30 @@ namespace PuntoVentaInventario.Controllers
         // Obtiene todos los productos activos
         [Authorize(Policy = Permissions.Productos.ActivosVer)]
         [HttpGet("listar_productos_activos")]
-        public async Task<IActionResult> GetProductosActivos()
+        public async Task<IActionResult> GetProductosActivos([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? search = null)
         {
             try
             {
-                var productos = await _context.Productos
-                    .Where(m => m.Activo)
+                if (page < 1) page = 1;
+                if (pageSize < 1) pageSize = 20;
+                if (pageSize > 100) pageSize = 100;
+
+                var query = _context.Productos
+                    .AsNoTracking()
+                    .Where(m => m.Activo);
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    var termino = search.Trim();
+                    query = query.Where(m => m.Codigo.Contains(termino) || m.Nombre.Contains(termino));
+                }
+
+                var total = await query.CountAsync();
+
+                var items = await query
                     .OrderBy(m => m.Nombre)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
                     .Select(m => new ProductoResponseDto
                     {
                         Id = m.Id,
@@ -75,7 +92,15 @@ namespace PuntoVentaInventario.Controllers
                     })
                     .ToListAsync();
 
-                return Ok(productos);
+                var resultado = new PagedResultDto<ProductoResponseDto>
+                {
+                    Items = items,
+                    Total = total,
+                    Page = page,
+                    PageSize = pageSize
+                };
+
+                return Ok(resultado);
             }
             catch (Exception ex)
             {
